@@ -219,6 +219,7 @@ onAuthStateChanged(auth, async (user) => {
   document.getElementById('sidebar-name').textContent = myProfile.name||'';
   document.getElementById('sidebar-handle').textContent = '@'+(myProfile.username||'');
   loadChats();
+  requestNotifications();
   const uid = new URLSearchParams(window.location.search).get('uid');
   if (uid) openChatWithUser(uid);
 });
@@ -279,6 +280,16 @@ window.openChat = function(chatId, other) {
       c.appendChild(div);
     });
     c.scrollTop = c.scrollHeight;
+    // Пуш если сообщение не от меня
+    snap.docChanges().forEach(change => {
+      if (change.type === 'added') {
+        const msg = change.doc.data();
+        if (msg.senderId !== me.uid && msg.createdAt) {
+          const name = document.getElementById('chat-name').textContent;
+          showPushNotification(name, msg.text);
+        }
+      }
+    });
   });
 };
 
@@ -335,6 +346,25 @@ window.searchForUser = async function(val) {
 window.closeChatMobile = () => document.getElementById('chat-window').classList.remove('open');
 window.handleKey = e => { if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } };
 window.autoResize = el => { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; };
+
+
+// Запрос разрешения на уведомления
+async function requestNotifications() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    await Notification.requestPermission();
+  }
+}
+
+function showPushNotification(title, body) {
+  if (Notification.permission !== 'granted') return;
+  if (document.visibilityState === 'visible') return; // не показывать если сайт активен
+  new Notification(title, {
+    body: body,
+    icon: '/favicon.ico',
+    badge: '/favicon.ico'
+  });
+}
 
 function timeAgo(d) {
   const s = Math.floor((Date.now()-d)/1000);
