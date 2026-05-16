@@ -7,41 +7,50 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #0F1117; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
-.card { background: #1A1D2E; border: 0.5px solid #2A2D40; border-radius: 16px; width: 100%; max-width: 380px; padding: 40px 36px 36px; }
-.logo { display: flex; align-items: center; gap: 10px; margin-bottom: 36px; }
+.card { background: #1A1D2E; border: 0.5px solid #2A2D40; border-radius: 16px; width: 100%; max-width: 380px; padding: 36px 32px 32px; }
+.logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
 .logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, #6C63FF, #4A90E2); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .logo-text { font-size: 18px; font-weight: 700; color: #E8E9EC; letter-spacing: -0.02em; }
-h1 { font-size: 22px; font-weight: 600; color: #E8E9EC; letter-spacing: -0.02em; margin-bottom: 8px; }
-.sub { font-size: 14px; color: #8B8FA8; margin-bottom: 28px; line-height: 1.6; }
+
+/* Tabs */
+.tabs { display: flex; background: #0F1117; border-radius: 10px; padding: 4px; margin-bottom: 24px; }
+.tab { flex: 1; text-align: center; padding: 8px; font-size: 13px; font-weight: 500; color: #8B8FA8; cursor: pointer; border-radius: 8px; transition: all 0.15s; }
+.tab.active { background: #1A1D2E; color: #E8E9EC; box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+
+h2 { font-size: 20px; font-weight: 600; color: #E8E9EC; margin-bottom: 6px; letter-spacing: -0.02em; }
+.sub { font-size: 13px; color: #8B8FA8; margin-bottom: 22px; line-height: 1.6; }
+
 label { display: block; font-size: 12px; color: #8B8FA8; margin-bottom: 6px; }
-input[type="email"] { width: 100%; border: 0.5px solid #2A2D40; border-radius: 10px; padding: 12px 14px; font-size: 14px; color: #E8E9EC; background: #0F1117; outline: none; transition: border-color 0.15s; margin-bottom: 14px; font-family: inherit; }
-input[type="email"]:focus { border-color: #6C63FF; }
-input[type="email"]::placeholder { color: #4A4D60; }
+.field { width: 100%; border: 0.5px solid #2A2D40; border-radius: 10px; padding: 11px 13px; font-size: 14px; color: #E8E9EC; background: #0F1117; outline: none; transition: border-color 0.15s; margin-bottom: 14px; font-family: inherit; }
+.field:focus { border-color: #6C63FF; }
+.field::placeholder { color: #4A4D60; }
+
 .btn { width: 100%; background: linear-gradient(135deg, #6C63FF, #4A90E2); color: white; border: none; border-radius: 10px; padding: 13px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
 .btn:hover { opacity: 0.88; }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.note { font-size: 12px; color: #4A4D60; text-align: center; margin-top: 14px; line-height: 1.6; }
+.note { font-size: 12px; color: #4A4D60; text-align: center; margin-top: 12px; line-height: 1.6; }
+.error { font-size: 12px; color: #E25B5B; background: rgba(226,91,91,0.1); border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; display: none; }
+.success { font-size: 13px; color: #5CC87A; background: rgba(92,200,122,0.1); border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; display: none; line-height: 1.6; }
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* Экран 2 — проверь почту */
+/* Экран проверки почты */
 .check-wrap { text-align: center; margin-bottom: 20px; }
-.check-icon { width: 56px; height: 56px; border-radius: 50%; background: rgba(108,99,255,0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto; }
-.check-icon i { font-size: 26px; color: #6C63FF; }
+.check-icon { width: 60px; height: 60px; border-radius: 50%; background: rgba(108,99,255,0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+.check-icon i { font-size: 28px; color: #6C63FF; }
 .email-badge { font-size: 14px; color: #6C63FF; background: rgba(108,99,255,0.1); border-radius: 8px; padding: 8px 14px; margin-bottom: 20px; text-align: center; word-break: break-all; }
-.btn-ghost { width: 100%; background: transparent; border: 0.5px solid #2A2D40; border-radius: 10px; padding: 12px; font-size: 13px; color: #8B8FA8; cursor: pointer; font-family: inherit; margin-top: 10px; transition: border-color 0.15s; }
+.btn-ghost { width: 100%; background: transparent; border: 0.5px solid #2A2D40; border-radius: 10px; padding: 12px; font-size: 13px; color: #8B8FA8; cursor: pointer; font-family: inherit; margin-top: 8px; transition: all 0.15s; }
 .btn-ghost:hover { border-color: #8B8FA8; color: #E8E9EC; }
 
 .screen { display: none; }
 .screen.active { display: block; }
-.error { font-size: 12px; color: #E25B5B; background: rgba(226,91,91,0.1); border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; display: none; }
-.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
-@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 </head>
 <body>
 <div class="card">
 
-  <!-- Экран 1: Ввод email -->
+  <!-- Экран 1: Вход/Регистрация -->
   <div id="s1" class="screen active">
     <div class="logo">
       <div class="logo-icon">
@@ -49,13 +58,38 @@ input[type="email"]::placeholder { color: #4A4D60; }
       </div>
       <div class="logo-text">Costax</div>
     </div>
-    <h1>Добро пожаловать</h1>
-    <p class="sub">Введи email — пришлём ссылку для входа. Без пароля.</p>
-    <div id="err1" class="error"></div>
-    <label>Email</label>
-    <input type="email" id="email-inp" placeholder="ivan@mail.ru" autocomplete="email" onkeydown="if(event.key==='Enter')sendLink()">
-    <button class="btn" id="btn-send" onclick="sendLink()">Войти</button>
-    <p class="note">Нажав кнопку, ты получишь письмо со ссылкой для входа</p>
+
+    <div class="tabs">
+      <div class="tab active" id="tab-login" onclick="switchTab('login')">Войти</div>
+      <div class="tab" id="tab-register" onclick="switchTab('register')">Регистрация</div>
+    </div>
+
+    <!-- Форма входа -->
+    <div id="form-login">
+      <h2>С возвращением</h2>
+      <p class="sub">Введи email — пришлём ссылку для входа</p>
+      <div id="err-login" class="error"></div>
+      <div id="ok-login" class="success"></div>
+      <label>Email</label>
+      <input type="email" id="login-email" class="field" placeholder="ivan@mail.ru" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="btn" id="btn-login" onclick="doLogin()">Войти</button>
+      <p class="note">Без пароля — просто ссылка на почту</p>
+    </div>
+
+    <!-- Форма регистрации -->
+    <div id="form-register" style="display:none">
+      <h2>Создать аккаунт</h2>
+      <p class="sub">Заполни данные — ссылка для подтверждения придёт на почту</p>
+      <div id="err-reg" class="error"></div>
+      <label>Имя</label>
+      <input type="text" id="reg-name" class="field" placeholder="Иван Петров" maxlength="40">
+      <label>Username</label>
+      <input type="text" id="reg-username" class="field" placeholder="ivan" maxlength="20" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')">
+      <label>Email</label>
+      <input type="email" id="reg-email" class="field" placeholder="ivan@mail.ru" onkeydown="if(event.key==='Enter')doRegister()">
+      <button class="btn" id="btn-reg" onclick="doRegister()">Зарегистрироваться</button>
+      <p class="note">Придёт письмо со ссылкой для входа</p>
+    </div>
   </div>
 
   <!-- Экран 2: Проверь почту -->
@@ -66,15 +100,13 @@ input[type="email"]::placeholder { color: #4A4D60; }
       </div>
       <div class="logo-text">Costax</div>
     </div>
-    <div class="check-wrap">
-      <div class="check-icon"><i class="ti ti-mail"></i></div>
-    </div>
-    <h1 style="text-align:center;margin-bottom:8px">Проверь почту</h1>
-    <p class="sub" style="text-align:center;margin-bottom:16px">Отправили ссылку для входа на</p>
+    <div class="check-icon"><i class="ti ti-mail"></i></div>
+    <h2 style="text-align:center;margin-bottom:8px">Проверь почту</h2>
+    <p class="sub" style="text-align:center;margin-bottom:14px">Отправили ссылку для входа на</p>
     <div class="email-badge" id="email-show"></div>
-    <p class="sub" style="text-align:center;font-size:13px">Открой письмо и нажми на ссылку — тебя автоматически перенесёт в ленту</p>
+    <p class="sub" style="text-align:center;font-size:13px;margin-bottom:16px">Открой письмо и нажми на ссылку — тебя автоматически перенесёт в ленту</p>
     <button class="btn-ghost" onclick="resend()">Отправить снова</button>
-    <button class="btn-ghost" onclick="goBack()" style="margin-top:6px">← Изменить email</button>
+    <button class="btn-ghost" onclick="goBack()" style="margin-top:6px">← Назад</button>
   </div>
 
 </div>
@@ -82,6 +114,7 @@ input[type="email"]::placeholder { color: #4A4D60; }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCeveXncaJYszckdflfTVWCDc0AwNilR9k",
@@ -94,48 +127,83 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
-const actionCodeSettings = {
-  url: 'https://www.costax.ru/login',
-  handleCodeInApp: true,
-};
+const actionCodeSettings = { url: 'https://www.costax.ru/login', handleCodeInApp: true };
 
-// Если уже вошёл — сразу в ленту
+// Уже вошёл — в ленту
 onAuthStateChanged(auth, user => {
   if (user && !isSignInWithEmailLink(auth, window.location.href)) {
     window.location.href = '/';
   }
 });
 
-// Проверяем — вдруг пользователь вернулся по ссылке из письма
+// Вернулся по ссылке из письма
 if (isSignInWithEmailLink(auth, window.location.href)) {
   let email = window.localStorage.getItem('emailForSignIn');
   if (!email) email = window.prompt('Введи свой email для подтверждения:');
   signInWithEmailLink(auth, email, window.location.href)
-    .then(() => {
+    .then(async (result) => {
       window.localStorage.removeItem('emailForSignIn');
+      // Если регистрация — сохранить профиль
+      const pending = JSON.parse(window.localStorage.getItem('pendingProfile') || 'null');
+      if (pending) {
+        window.localStorage.removeItem('pendingProfile');
+        await setDoc(doc(db, 'users', result.user.uid), {
+          name: pending.name,
+          username: pending.username,
+          email: email,
+          verified: true,
+          photoURL: null,
+          updatedAt: new Date()
+        });
+      }
       window.location.href = '/';
     })
-    .catch(e => showError('err1', 'Ошибка входа: ' + e.message));
+    .catch(e => alert('Ошибка входа: ' + e.message));
 }
 
-window.sendLink = async function() {
-  const email = document.getElementById('email-inp').value.trim();
-  if (!email) { showError('err1', 'Введи email'); return; }
-  if (!email.includes('@')) { showError('err1', 'Неверный формат email'); return; }
-  const btn = document.getElementById('btn-send');
+window.switchTab = function(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  document.getElementById('form-login').style.display = tab==='login' ? 'block' : 'none';
+  document.getElementById('form-register').style.display = tab==='register' ? 'block' : 'none';
+};
+
+window.doLogin = async function() {
+  const email = document.getElementById('login-email').value.trim();
+  if (!email) { showErr('err-login', 'Введи email'); return; }
+  const btn = document.getElementById('btn-login');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Отправляем...';
   try {
     await sendSignInLinkToEmail(auth, email, actionCodeSettings);
     window.localStorage.setItem('emailForSignIn', email);
-    document.getElementById('email-show').textContent = email;
-    document.getElementById('s1').classList.remove('active');
-    document.getElementById('s2').classList.add('active');
+    showScreen2(email);
   } catch(e) {
-    btn.disabled = false;
-    btn.textContent = 'Войти';
-    showError('err1', 'Ошибка: ' + e.message);
+    btn.disabled = false; btn.textContent = 'Войти';
+    showErr('err-login', 'Ошибка: ' + e.message);
+  }
+};
+
+window.doRegister = async function() {
+  const name = document.getElementById('reg-name').value.trim();
+  const username = document.getElementById('reg-username').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  if (!name) { showErr('err-reg', 'Введи имя'); return; }
+  if (!username || username.length < 3) { showErr('err-reg', 'Username минимум 3 символа'); return; }
+  if (!email) { showErr('err-reg', 'Введи email'); return; }
+  const btn = document.getElementById('btn-reg');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Отправляем...';
+  try {
+    await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+    window.localStorage.setItem('emailForSignIn', email);
+    window.localStorage.setItem('pendingProfile', JSON.stringify({ name, username }));
+    showScreen2(email);
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Зарегистрироваться';
+    showErr('err-reg', 'Ошибка: ' + e.message);
   }
 };
 
@@ -151,14 +219,21 @@ window.resend = async function() {
 window.goBack = function() {
   document.getElementById('s2').classList.remove('active');
   document.getElementById('s1').classList.add('active');
-  document.getElementById('btn-send').disabled = false;
-  document.getElementById('btn-send').textContent = 'Войти';
+  document.getElementById('btn-login').disabled = false;
+  document.getElementById('btn-login').textContent = 'Войти';
+  document.getElementById('btn-reg').disabled = false;
+  document.getElementById('btn-reg').textContent = 'Зарегистрироваться';
 };
 
-function showError(id, msg) {
+function showScreen2(email) {
+  document.getElementById('email-show').textContent = email;
+  document.getElementById('s1').classList.remove('active');
+  document.getElementById('s2').classList.add('active');
+}
+
+function showErr(id, msg) {
   const el = document.getElementById(id);
-  el.textContent = msg;
-  el.style.display = 'block';
+  el.textContent = msg; el.style.display = 'block';
   setTimeout(() => el.style.display = 'none', 5000);
 }
 </script>
