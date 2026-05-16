@@ -56,12 +56,38 @@ body { font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #0F
 .p-handle { font-size: 13px; color: #8B8FA8; }
 .p-dot { color: #4A4D60; font-size: 11px; }
 .p-time { font-size: 12px; color: #4A4D60; }
+.p-more { margin-left: auto; background: none; border: none; color: #4A4D60; cursor: pointer; font-size: 16px; padding: 2px 6px; border-radius: 6px; transition: all 0.15s; position: relative; }
+.p-more:hover { background: #1A1D2E; color: #E8E9EC; }
+.p-menu { position: absolute; right: 0; top: 24px; background: #1A1D2E; border: 0.5px solid #2A2D40; border-radius: 10px; padding: 4px; z-index: 50; min-width: 140px; display: none; }
+.p-menu.show { display: block; }
+.p-menu-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 7px; font-size: 13px; cursor: pointer; transition: background 0.1s; }
+.p-menu-item:hover { background: #232640; }
+.p-menu-item.danger { color: #E25B5B; }
+.p-menu-item.danger:hover { background: rgba(226,91,91,0.1); }
+
 .post-text { font-size: 14px; color: #C8CAD8; line-height: 1.6; margin-bottom: 10px; word-break: break-word; }
 .post-actions { display: flex; gap: 4px; }
 .p-action { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #4A4D60; cursor: pointer; background: none; border: none; font-family: inherit; padding: 5px 10px; border-radius: 20px; transition: all 0.15s; }
 .p-action:hover { color: #6C63FF; background: rgba(108,99,255,0.1); }
 .p-action.liked { color: #E25B5B; }
 .p-action i { font-size: 15px; }
+
+/* Comments */
+.comments-section { border-top: 0.5px solid #1E2030; margin-top: 10px; padding-top: 10px; display: none; }
+.comments-section.open { display: block; }
+.comment { display: flex; gap: 8px; margin-bottom: 10px; }
+.cm-av { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #6C63FF, #4A90E2); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; cursor: pointer; }
+.cm-body { flex: 1; background: #1A1D2E; border-radius: 10px; padding: 8px 12px; }
+.cm-name { font-size: 12px; font-weight: 600; color: #E8E9EC; margin-bottom: 2px; cursor: pointer; }
+.cm-name:hover { color: #6C63FF; }
+.cm-text { font-size: 13px; color: #C8CAD8; line-height: 1.5; word-break: break-word; }
+.cm-input-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+.cm-av-small { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #6C63FF, #4A90E2); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; }
+.cm-input { flex: 1; border: 0.5px solid #2A2D40; border-radius: 20px; padding: 7px 14px; font-size: 13px; color: #E8E9EC; background: #1A1D2E; outline: none; font-family: inherit; transition: border-color 0.15s; }
+.cm-input:focus { border-color: #6C63FF; }
+.cm-input::placeholder { color: #4A4D60; }
+.cm-send { background: linear-gradient(135deg, #6C63FF, #4A90E2); border: none; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+.cm-send i { font-size: 14px; color: white; }
 
 .right-panel { width: 290px; min-width: 290px; padding: 16px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
 .r-search { display: flex; align-items: center; gap: 8px; background: #1A1D2E; border-radius: 20px; padding: 9px 14px; }
@@ -165,7 +191,7 @@ body { font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #0F
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, doc, getDoc, getDocs, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, doc, getDoc, getDocs, deleteDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCeveXncaJYszckdflfTVWCDc0AwNilR9k",
@@ -213,34 +239,116 @@ function loadFeed() {
 function renderPost(id, data) {
   const liked = data.likes?.includes(me?.uid);
   const count = data.likes?.length || 0;
+  const commCount = data.commentCount || 0;
   const init = (data.authorName||'U')[0].toUpperCase();
   const time = data.createdAt ? timeAgo(data.createdAt.toDate()) : '';
+  const isOwn = data.authorId === me?.uid;
+  const myInit = (myProfile?.name||'U')[0].toUpperCase();
+
+  const menuHtml = isOwn ? `
+    <button class="p-more" onclick="toggleMenu(event,'menu-${id}')">···</button>
+    <div class="p-menu" id="menu-${id}">
+      <div class="p-menu-item danger" onclick="deletePost('${id}')">
+        <i class="ti ti-trash"></i>Удалить пост
+      </div>
+    </div>` : '';
+
   const div = document.createElement('div');
   div.className = 'post';
+  div.id = 'post-'+id;
   div.innerHTML = `
     <div class="post-inner">
       <div class="p-av" onclick="viewUser('${data.authorId}')">${init}</div>
       <div class="p-body">
-        <div class="p-name-row" onclick="viewUser('${data.authorId}')">
-          <span class="p-name">${esc(data.authorName||'Аноним')}</span>
-          ${badge}
-          <span class="p-handle">@${esc(data.authorUsername||'user')}</span>
-          <span class="p-dot">·</span>
-          <span class="p-time">${time}</span>
+        <div class="p-name-row" style="position:relative">
+          <span onclick="viewUser('${data.authorId}')" style="display:flex;align-items:center;gap:5px;cursor:pointer">
+            <span class="p-name">${esc(data.authorName||'Аноним')}</span>
+            ${badge}
+            <span class="p-handle">@${esc(data.authorUsername||'user')}</span>
+            <span class="p-dot">·</span>
+            <span class="p-time">${time}</span>
+          </span>
+          ${menuHtml}
         </div>
         <div class="post-text">${esc(data.text)}</div>
         <div class="post-actions">
           <button class="p-action ${liked?'liked':''}" onclick="toggleLike('${id}',${liked})">
             <i class="ti ti-heart"></i>${count}
           </button>
-          <button class="p-action" onclick="msgUser('${data.authorId}')">
-            <i class="ti ti-message-circle"></i>Написать
+          <button class="p-action" onclick="toggleComments('${id}')">
+            <i class="ti ti-message-circle"></i>${commCount > 0 ? commCount : ''}
           </button>
+          <button class="p-action" onclick="msgUser('${data.authorId}')">
+            <i class="ti ti-send"></i>Написать
+          </button>
+        </div>
+        <div class="comments-section" id="comments-${id}">
+          <div id="comments-list-${id}"></div>
+          <div class="cm-input-row">
+            <div class="cm-av-small">${myInit}</div>
+            <input class="cm-input" id="cm-inp-${id}" placeholder="Напиши комментарий..." onkeydown="if(event.key==='Enter')addComment('${id}')">
+            <button class="cm-send" onclick="addComment('${id}')"><i class="ti ti-send"></i></button>
+          </div>
         </div>
       </div>
     </div>`;
   return div;
 }
+
+window.toggleMenu = function(e, menuId) {
+  e.stopPropagation();
+  document.querySelectorAll('.p-menu').forEach(m => { if (m.id !== menuId) m.classList.remove('show'); });
+  document.getElementById(menuId)?.classList.toggle('show');
+};
+
+document.addEventListener('click', () => document.querySelectorAll('.p-menu').forEach(m => m.classList.remove('show')));
+
+window.deletePost = async function(id) {
+  if (!confirm('Удалить пост?')) return;
+  await deleteDoc(doc(db, 'posts', id));
+};
+
+window.toggleComments = async function(id) {
+  const section = document.getElementById('comments-'+id);
+  section.classList.toggle('open');
+  if (section.classList.contains('open')) {
+    loadComments(id);
+    document.getElementById('cm-inp-'+id)?.focus();
+  }
+};
+
+async function loadComments(postId) {
+  const q = query(collection(db,'posts',postId,'comments'), orderBy('createdAt','asc'));
+  onSnapshot(q, snap => {
+    const list = document.getElementById('comments-list-'+postId);
+    if (!list) return;
+    list.innerHTML = '';
+    snap.forEach(d => {
+      const c = d.data();
+      const div = document.createElement('div');
+      div.className = 'comment';
+      div.innerHTML = `
+        <div class="cm-av" onclick="viewUser('${c.authorId}')">${(c.authorName||'U')[0].toUpperCase()}</div>
+        <div class="cm-body">
+          <div class="cm-name" onclick="viewUser('${c.authorId}')">${esc(c.authorName||'Аноним')} ${badge}</div>
+          <div class="cm-text">${esc(c.text)}</div>
+        </div>`;
+      list.appendChild(div);
+    });
+  });
+}
+
+window.addComment = async function(postId) {
+  const inp = document.getElementById('cm-inp-'+postId);
+  const text = inp?.value.trim();
+  if (!text || !myProfile) return;
+  inp.value = '';
+  await addDoc(collection(db,'posts',postId,'comments'), {
+    text, authorId: me.uid, authorName: myProfile.name,
+    authorUsername: myProfile.username, createdAt: serverTimestamp()
+  });
+  await updateDoc(doc(db,'posts',postId), { commentCount: (await getDoc(doc(db,'posts',postId))).data()?.commentCount + 1 || 1 });
+};
 
 async function loadUsers() {
   const snap = await getDocs(query(collection(db, 'users'), limit(10)));
@@ -252,20 +360,13 @@ async function loadUsers() {
     const div = document.createElement('div');
     div.className = 'r-user';
     div.innerHTML = `<div class="ru-av">${(u.name||'U')[0].toUpperCase()}</div><div><div class="ru-name">${esc(u.name)}${badge}</div><div class="ru-handle">@${esc(u.username)}</div></div>`;
-    div.onclick = () => window.location.href = '/messages.html?uid='+d.id;
+    div.onclick = () => window.location.href = '/user.html?uid='+d.id;
     list.appendChild(div);
   });
 }
 
-window.viewUser = function(uid) {
-  if (!uid) return;
-  window.location.href = '/user.html?uid=' + uid;
-};
-
-window.msgUser = function(uid) {
-  if (!uid || uid === me?.uid) return;
-  window.location.href = '/messages.html?uid=' + uid;
-};
+window.viewUser = function(uid) { if (!uid) return; window.location.href = '/user.html?uid='+uid; };
+window.msgUser = function(uid) { if (!uid || uid === me?.uid) return; window.location.href = '/messages.html?uid='+uid; };
 
 window.publishPost = async function() {
   const text = document.getElementById('post-text').value.trim();
@@ -274,8 +375,8 @@ window.publishPost = async function() {
   btn.disabled = true;
   await addDoc(collection(db, 'posts'), {
     text, authorId: me.uid, authorName: myProfile.name,
-    authorUsername: myProfile.username,
-    likes: [], createdAt: serverTimestamp()
+    authorUsername: myProfile.username, likes: [], commentCount: 0,
+    createdAt: serverTimestamp()
   });
   document.getElementById('post-text').value = '';
   document.getElementById('char-count').textContent = '280';
@@ -300,7 +401,7 @@ window.searchUsers = async function(val) {
     const div = document.createElement('div');
     div.className = 'sd-item';
     div.innerHTML = `<div class="ru-av" style="width:30px;height:30px;font-size:11px">${(u.name||'U')[0].toUpperCase()}</div><div><div style="font-size:13px;color:#E8E9EC">${esc(u.name)}${badge}</div><div style="font-size:12px;color:#8B8FA8">@${esc(u.username)}</div></div>`;
-    div.onclick = () => window.location.href = '/messages.html?uid='+d.id;
+    div.onclick = () => window.location.href = '/user.html?uid='+d.id;
     dd.appendChild(div);
   });
   dd.classList.toggle('show', !snap.empty);
