@@ -4,117 +4,95 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Costax — Вход</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #0F1117; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
-.card { background: #1A1D2E; border: 0.5px solid #2A2D40; border-radius: 16px; width: 100%; max-width: 380px; padding: 36px 32px 32px; }
-.logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
-.logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, #6C63FF, #4A90E2); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.logo-text { font-size: 18px; font-weight: 700; color: #E8E9EC; letter-spacing: -0.02em; }
-
-/* Tabs */
-.tabs { display: flex; background: #0F1117; border-radius: 10px; padding: 4px; margin-bottom: 24px; }
-.tab { flex: 1; text-align: center; padding: 8px; font-size: 13px; font-weight: 500; color: #8B8FA8; cursor: pointer; border-radius: 8px; transition: all 0.15s; }
-.tab.active { background: #1A1D2E; color: #E8E9EC; box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
-
-h2 { font-size: 20px; font-weight: 600; color: #E8E9EC; margin-bottom: 6px; letter-spacing: -0.02em; }
-.sub { font-size: 13px; color: #8B8FA8; margin-bottom: 22px; line-height: 1.6; }
-
-label { display: block; font-size: 12px; color: #8B8FA8; margin-bottom: 6px; }
-.field { width: 100%; border: 0.5px solid #2A2D40; border-radius: 10px; padding: 11px 13px; font-size: 14px; color: #E8E9EC; background: #0F1117; outline: none; transition: border-color 0.15s; margin-bottom: 14px; font-family: inherit; }
-.field:focus { border-color: #6C63FF; }
-.field::placeholder { color: #4A4D60; }
-
-.btn { width: 100%; background: linear-gradient(135deg, #6C63FF, #4A90E2); color: white; border: none; border-radius: 10px; padding: 13px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
-.btn:hover { opacity: 0.88; }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.note { font-size: 12px; color: #4A4D60; text-align: center; margin-top: 12px; line-height: 1.6; }
-.error { font-size: 12px; color: #E25B5B; background: rgba(226,91,91,0.1); border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; display: none; }
-.success { font-size: 13px; color: #5CC87A; background: rgba(92,200,122,0.1); border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; display: none; line-height: 1.6; }
-.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+body { font-family: 'Nunito', -apple-system, sans-serif; background: #F7F9F9; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.card { background: white; border: 1px solid #EFF3F4; border-radius: 16px; width: 100%; max-width: 380px; padding: 32px 28px 28px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
+.logo { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+.logo-icon { width: 32px; height: 32px; background: #1D9BF0; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.logo-text { font-size: 18px; font-weight: 800; color: #0F1419; letter-spacing: -0.02em; }
+.tabs { display: flex; border-bottom: 1px solid #EFF3F4; margin-bottom: 22px; }
+.tab { flex: 1; text-align: center; padding: 10px; font-size: 14px; font-weight: 700; color: #536471; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; user-select: none; }
+.tab.active { color: #0F1419; border-bottom-color: #1D9BF0; }
+h2 { font-size: 20px; font-weight: 800; color: #0F1419; margin-bottom: 4px; letter-spacing: -0.02em; }
+.sub { font-size: 13px; color: #536471; margin-bottom: 20px; line-height: 1.5; }
+.label { font-size: 13px; font-weight: 700; color: #536471; margin-bottom: 5px; display: block; }
+.inp { width: 100%; border: 1px solid #CFD9DE; border-radius: 8px; padding: 11px 13px; font-size: 15px; color: #0F1419; outline: none; font-family: inherit; transition: border-color 0.15s; margin-bottom: 14px; }
+.inp:focus { border-color: #1D9BF0; }
+.inp::placeholder { color: #9AA5B0; }
+.btn-main { width: 100%; background: #0F1419; color: white; border: none; border-radius: 9999px; padding: 13px; font-size: 15px; font-weight: 800; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+.btn-main:hover { background: #272C30; }
+.btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-blue { background: #1D9BF0; }
+.btn-blue:hover { background: #1A8CD8; }
+.error { font-size: 13px; color: #F4212E; background: rgba(244,33,46,0.08); border-radius: 8px; padding: 9px 13px; margin-bottom: 14px; display: none; border: 1px solid rgba(244,33,46,0.15); }
+.success { font-size: 13px; color: #00BA7C; background: rgba(0,186,124,0.08); border-radius: 8px; padding: 9px 13px; margin-bottom: 14px; display: none; }
+.note { font-size: 13px; color: #536471; text-align: center; margin-top: 16px; line-height: 1.6; }
+.note a { color: #1D9BF0; text-decoration: none; font-weight: 700; cursor: pointer; }
+.note a:hover { text-decoration: underline; }
+.divider { display: flex; align-items: center; gap: 10px; margin: 16px 0; }
+.div-line { flex: 1; height: 1px; background: #EFF3F4; }
+.div-text { font-size: 12px; color: #536471; font-weight: 700; }
+.forgot { text-align: center; margin-top: 10px; }
+.forgot a { font-size: 13px; color: #536471; cursor: pointer; }
+.forgot a:hover { color: #1D9BF0; }
+.spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
 @keyframes spin { to { transform: rotate(360deg); } }
-
-/* Экран проверки почты */
-.check-wrap { text-align: center; margin-bottom: 20px; }
-.check-icon { width: 60px; height: 60px; border-radius: 50%; background: rgba(108,99,255,0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
-.check-icon i { font-size: 28px; color: #6C63FF; }
-.email-badge { font-size: 14px; color: #6C63FF; background: rgba(108,99,255,0.1); border-radius: 8px; padding: 8px 14px; margin-bottom: 20px; text-align: center; word-break: break-all; }
-.btn-ghost { width: 100%; background: transparent; border: 0.5px solid #2A2D40; border-radius: 10px; padding: 12px; font-size: 13px; color: #8B8FA8; cursor: pointer; font-family: inherit; margin-top: 8px; transition: all 0.15s; }
-.btn-ghost:hover { border-color: #8B8FA8; color: #E8E9EC; }
-
 .screen { display: none; }
 .screen.active { display: block; }
 </style>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 </head>
 <body>
 <div class="card">
-
-  <!-- Экран 1: Вход/Регистрация -->
-  <div id="s1" class="screen active">
-    <div class="logo">
-      <div class="logo-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-      </div>
-      <div class="logo-text">Costax</div>
+  <div class="logo">
+    <div class="logo-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
     </div>
-
-    <div class="tabs">
-      <div class="tab active" id="tab-login" onclick="switchTab('login')">Войти</div>
-      <div class="tab" id="tab-register" onclick="switchTab('register')">Регистрация</div>
-    </div>
-
-    <!-- Форма входа -->
-    <div id="form-login">
-      <h2>С возвращением</h2>
-      <p class="sub">Введи email — пришлём ссылку для входа</p>
-      <div id="err-login" class="error"></div>
-      <div id="ok-login" class="success"></div>
-      <label>Email</label>
-      <input type="email" id="login-email" class="field" placeholder="ivan@mail.ru" onkeydown="if(event.key==='Enter')doLogin()">
-      <button class="btn" id="btn-login" onclick="doLogin()">Войти</button>
-      <p class="note">Без пароля — просто ссылка на почту</p>
-    </div>
-
-    <!-- Форма регистрации -->
-    <div id="form-register" style="display:none">
-      <h2>Создать аккаунт</h2>
-      <p class="sub">Заполни данные — ссылка для подтверждения придёт на почту</p>
-      <div id="err-reg" class="error"></div>
-      <label>Имя</label>
-      <input type="text" id="reg-name" class="field" placeholder="Иван Петров" maxlength="40">
-      <label>Username</label>
-      <input type="text" id="reg-username" class="field" placeholder="ivan" maxlength="20" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')">
-      <label>Email</label>
-      <input type="email" id="reg-email" class="field" placeholder="ivan@mail.ru" onkeydown="if(event.key==='Enter')doRegister()">
-      <button class="btn" id="btn-reg" onclick="doRegister()">Зарегистрироваться</button>
-      <p class="note">Придёт письмо со ссылкой для входа</p>
-    </div>
+    <span class="logo-text">Costax</span>
   </div>
 
-  <!-- Экран 2: Проверь почту -->
-  <div id="s2" class="screen">
-    <div class="logo">
-      <div class="logo-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-      </div>
-      <div class="logo-text">Costax</div>
-    </div>
-    <div class="check-icon"><i class="ti ti-mail"></i></div>
-    <h2 style="text-align:center;margin-bottom:8px">Проверь почту</h2>
-    <p class="sub" style="text-align:center;margin-bottom:14px">Отправили ссылку для входа на</p>
-    <div class="email-badge" id="email-show"></div>
-    <p class="sub" style="text-align:center;font-size:13px;margin-bottom:16px">Открой письмо и нажми на ссылку — тебя автоматически перенесёт в ленту</p>
-    <button class="btn-ghost" onclick="resend()">Отправить снова</button>
-    <button class="btn-ghost" onclick="goBack()" style="margin-top:6px">← Назад</button>
+  <div class="tabs">
+    <div class="tab active" id="tab-login" onclick="switchTab('login')">Войти</div>
+    <div class="tab" id="tab-reg" onclick="switchTab('reg')">Регистрация</div>
   </div>
 
+  <!-- Вход -->
+  <div id="screen-login" class="screen active">
+    <h2>С возвращением</h2>
+    <p class="sub">Введи email и пароль</p>
+    <div class="error" id="err-login"></div>
+    <label class="label">Email</label>
+    <input class="inp" type="email" id="login-email" placeholder="ivan@mail.ru" autocomplete="email" onkeydown="if(event.key==='Enter')doLogin()">
+    <label class="label">Пароль</label>
+    <input class="inp" type="password" id="login-pass" placeholder="Твой пароль" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-main btn-blue" id="btn-login" onclick="doLogin()">Войти</button>
+    <div class="forgot"><a onclick="doReset()">Забыл пароль?</a></div>
+    <p class="note">Нет аккаунта? <a onclick="switchTab('reg')">Зарегистрироваться</a></p>
+  </div>
+
+  <!-- Регистрация -->
+  <div id="screen-reg" class="screen">
+    <h2>Создать аккаунт</h2>
+    <p class="sub">Заполни данные — вход сразу после регистрации</p>
+    <div class="error" id="err-reg"></div>
+    <div class="success" id="ok-reg"></div>
+    <label class="label">Email</label>
+    <input class="inp" type="email" id="reg-email" placeholder="ivan@mail.ru" autocomplete="email">
+    <label class="label">Пароль</label>
+    <input class="inp" type="password" id="reg-pass" placeholder="Минимум 6 символов" autocomplete="new-password">
+    <label class="label">Повтори пароль</label>
+    <input class="inp" type="password" id="reg-pass2" placeholder="Повтори пароль" autocomplete="new-password" onkeydown="if(event.key==='Enter')doRegister()">
+    <button class="btn-main" id="btn-reg" onclick="doRegister()">Зарегистрироваться</button>
+    <p class="note">Уже есть аккаунт? <a onclick="switchTab('login')">Войти</a></p>
+  </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCeveXncaJYszckdflfTVWCDc0AwNilR9k",
@@ -129,113 +107,96 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const actionCodeSettings = { url: 'https://www.costax.ru/login', handleCodeInApp: true };
-
 // Уже вошёл — в ленту
-onAuthStateChanged(auth, user => {
-  if (user && !isSignInWithEmailLink(auth, window.location.href)) {
-    window.location.href = '/';
-  }
+onAuthStateChanged(auth, async user => {
+  if (!user) return;
+  const pd = await getDoc(doc(db, 'users', user.uid));
+  if (!pd.exists()) { window.location.href = '/profile.html?setup=1'; return; }
+  window.location.href = '/';
 });
-
-// Вернулся по ссылке из письма
-if (isSignInWithEmailLink(auth, window.location.href)) {
-  let email = window.localStorage.getItem('emailForSignIn');
-  if (!email) email = window.prompt('Введи свой email для подтверждения:');
-  signInWithEmailLink(auth, email, window.location.href)
-    .then(async (result) => {
-      window.localStorage.removeItem('emailForSignIn');
-      // Если регистрация — сохранить профиль
-      const pending = JSON.parse(window.localStorage.getItem('pendingProfile') || 'null');
-      if (pending) {
-        window.localStorage.removeItem('pendingProfile');
-        await setDoc(doc(db, 'users', result.user.uid), {
-          name: pending.name,
-          username: pending.username,
-          email: email,
-          verified: true,
-          photoURL: null,
-          updatedAt: new Date()
-        });
-      }
-      window.location.href = '/';
-    })
-    .catch(e => alert('Ошибка входа: ' + e.message));
-}
-
-window.switchTab = function(tab) {
-  document.getElementById('tab-login').classList.toggle('active', tab==='login');
-  document.getElementById('tab-register').classList.toggle('active', tab==='register');
-  document.getElementById('form-login').style.display = tab==='login' ? 'block' : 'none';
-  document.getElementById('form-register').style.display = tab==='register' ? 'block' : 'none';
-};
 
 window.doLogin = async function() {
   const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
   if (!email) { showErr('err-login', 'Введи email'); return; }
+  if (!pass) { showErr('err-login', 'Введи пароль'); return; }
   const btn = document.getElementById('btn-login');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Отправляем...';
+  btn.innerHTML = '<span class="spinner"></span>Входим...';
   try {
-    await sendSignInLinkToEmail(auth, email, actionCodeSettings);
-    window.localStorage.setItem('emailForSignIn', email);
-    showScreen2(email);
+    await signInWithEmailAndPassword(auth, email, pass);
+    // onAuthStateChanged перенаправит
   } catch(e) {
     btn.disabled = false; btn.textContent = 'Войти';
-    showErr('err-login', 'Ошибка: ' + e.message);
+    const msgs = {
+      'auth/user-not-found': 'Пользователь не найден',
+      'auth/wrong-password': 'Неверный пароль',
+      'auth/invalid-credential': 'Неверный email или пароль',
+      'auth/too-many-requests': 'Слишком много попыток, подожди немного',
+      'auth/invalid-email': 'Неверный формат email'
+    };
+    showErr('err-login', msgs[e.code] || 'Ошибка: ' + e.message);
   }
 };
 
 window.doRegister = async function() {
-  const name = document.getElementById('reg-name').value.trim();
-  const username = document.getElementById('reg-username').value.trim();
   const email = document.getElementById('reg-email').value.trim();
-  if (!name) { showErr('err-reg', 'Введи имя'); return; }
-  if (!username || username.length < 3) { showErr('err-reg', 'Username минимум 3 символа'); return; }
+  const pass = document.getElementById('reg-pass').value;
+  const pass2 = document.getElementById('reg-pass2').value;
   if (!email) { showErr('err-reg', 'Введи email'); return; }
+  if (!pass || pass.length < 6) { showErr('err-reg', 'Пароль минимум 6 символов'); return; }
+  if (pass !== pass2) { showErr('err-reg', 'Пароли не совпадают'); return; }
   const btn = document.getElementById('btn-reg');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Отправляем...';
+  btn.innerHTML = '<span class="spinner"></span>Регистрируем...';
   try {
-    await sendSignInLinkToEmail(auth, email, actionCodeSettings);
-    window.localStorage.setItem('emailForSignIn', email);
-    window.localStorage.setItem('pendingProfile', JSON.stringify({ name, username }));
-    showScreen2(email);
+    await createUserWithEmailAndPassword(auth, email, pass);
+    // onAuthStateChanged перенаправит на /profile.html?setup=1
   } catch(e) {
     btn.disabled = false; btn.textContent = 'Зарегистрироваться';
-    showErr('err-reg', 'Ошибка: ' + e.message);
+    const msgs = {
+      'auth/email-already-in-use': 'Этот email уже зарегистрирован',
+      'auth/invalid-email': 'Неверный формат email',
+      'auth/weak-password': 'Пароль слишком простой'
+    };
+    showErr('err-reg', msgs[e.code] || 'Ошибка: ' + e.message);
   }
 };
 
-window.resend = async function() {
-  const email = window.localStorage.getItem('emailForSignIn');
-  if (!email) { goBack(); return; }
+window.doReset = async function() {
+  const email = document.getElementById('login-email').value.trim();
+  if (!email) { showErr('err-login', 'Введи email для сброса пароля'); return; }
   try {
-    await sendSignInLinkToEmail(auth, email, actionCodeSettings);
-    alert('Письмо отправлено повторно!');
-  } catch(e) { alert('Ошибка: ' + e.message); }
+    await sendPasswordResetEmail(auth, email);
+    showErr('err-login', '');
+    const el = document.getElementById('err-login');
+    el.textContent = 'Письмо со сбросом пароля отправлено!';
+    el.style.display = 'block';
+    el.style.color = '#00BA7C';
+    el.style.background = 'rgba(0,186,124,0.08)';
+  } catch(e) {
+    showErr('err-login', 'Ошибка: ' + e.message);
+  }
 };
-
-window.goBack = function() {
-  document.getElementById('s2').classList.remove('active');
-  document.getElementById('s1').classList.add('active');
-  document.getElementById('btn-login').disabled = false;
-  document.getElementById('btn-login').textContent = 'Войти';
-  document.getElementById('btn-reg').disabled = false;
-  document.getElementById('btn-reg').textContent = 'Зарегистрироваться';
-};
-
-function showScreen2(email) {
-  document.getElementById('email-show').textContent = email;
-  document.getElementById('s1').classList.remove('active');
-  document.getElementById('s2').classList.add('active');
-}
 
 function showErr(id, msg) {
   const el = document.getElementById(id);
-  el.textContent = msg; el.style.display = 'block';
+  if (!msg) { el.style.display = 'none'; return; }
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.style.color = '#F4212E';
+  el.style.background = 'rgba(244,33,46,0.08)';
   setTimeout(() => el.style.display = 'none', 5000);
 }
+</script>
+
+<script>
+window.switchTab = function(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-reg').classList.toggle('active', tab === 'reg');
+  document.getElementById('screen-login').classList.toggle('active', tab === 'login');
+  document.getElementById('screen-reg').classList.toggle('active', tab === 'reg');
+};
 </script>
 </body>
 </html>
