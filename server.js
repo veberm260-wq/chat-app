@@ -25,6 +25,9 @@ app.get('/messages.html', (req, res) => {
 });
 
 // Главная — лента
+app.get('/sw.js', (req, res) => res.sendFile(path.join(__dirname, 'public', 'sw.js')));
+app.get('/manifest.json', (req, res) => res.sendFile(path.join(__dirname, 'public', 'manifest.json')));
+
 app.get('/user', (req, res) => res.sendFile(path.join(__dirname, 'public', 'user.html')));
 app.get('/user.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'user.html')));
 
