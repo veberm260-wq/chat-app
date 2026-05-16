@@ -257,6 +257,11 @@ async function loadUsers() {
   });
 }
 
+window.viewUser = function(uid) {
+  if (!uid) return;
+  window.location.href = '/user.html?uid=' + uid;
+};
+
 window.msgUser = function(uid) {
   if (!uid || uid === me?.uid) return;
   window.location.href = '/messages.html?uid=' + uid;
