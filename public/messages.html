@@ -227,7 +227,7 @@ onAuthStateChanged(auth, async (user) => {
 function getChatId(a, b) { return [a,b].sort().join('_'); }
 
 function loadChats() {
-  const q = query(collection(db,'chats'), where('members','array-contains',me.uid), orderBy('lastAt','desc'));
+  const q = query(collection(db,'chats'), where('members','array-contains',me.uid));
   onSnapshot(q, async snap => {
     const list = document.getElementById('chats-list');
     if (snap.empty) { list.innerHTML = '<div class="empty-chats">Нет сообщений.<br>Нажми «+ Новый» чтобы написать кому-то.</div>'; return; }
