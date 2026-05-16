@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Costax — Профиль</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #F5F0E8; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.card { background: #FDFAF4; border: 0.5px solid #DDD5C0; border-radius: 14px; width: 100%; max-width: 400px; padding: 40px 36px 36px; }
+.logo { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #C8A84B; margin-bottom: 12px; }
+.step-line { display: flex; align-items: center; gap: 8px; margin-bottom: 28px; }
+.step { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #B8A882; }
+.step.done { color: #5C7A3E; }
+.step.active { color: #2D3A1E; font-weight: 500; }
+.step-dot { width: 6px; height: 6px; border-radius: 50%; background: #DDD5C0; }
+.step.done .step-dot { background: #5C7A3E; }
+.step.active .step-dot { background: #2D3A1E; }
+.step-sep { flex: 1; height: 0.5px; background: #DDD5C0; }
+h1 { font-size: 22px; font-weight: 500; color: #2D3A1E; letter-spacing: -0.02em; margin-bottom: 6px; }
+.sub { font-size: 13px; color: #888; margin-bottom: 28px; line-height: 1.6; }
+.avatar-wrap { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+.avatar-circle { width: 68px; height: 68px; border-radius: 50%; background: #C8A84B; border: 0.5px solid #DDD5C0; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 700; color: #2D3A1E; cursor: pointer; overflow: hidden; flex-shrink: 0; transition: opacity 0.15s; }
+.avatar-circle:hover { opacity: 0.8; }
+.avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+.av-hint b { font-size: 13px; color: #2D3A1E; display: block; margin-bottom: 3px; font-weight: 500; }
+.av-hint span { font-size: 12px; color: #888; line-height: 1.5; }
+label { display: block; font-size: 12px; color: #5F5E5A; margin-bottom: 6px; }
+input { width: 100%; border: 0.5px solid #DDD5C0; border-radius: 8px; padding: 11px 13px; font-size: 14px; color: #2D3A1E; background: #FDFAF4; outline: none; transition: border-color 0.15s; margin-bottom: 14px; font-family: inherit; }
+input:focus { border-color: #5C7A3E; }
+input.readonly { background: #F5F0E8; color: #888; cursor: default; }
+input.prefix { padding-left: 28px; }
+.inp-wrap { position: relative; margin-bottom: 14px; }
+.inp-prefix { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #B8A882; pointer-events: none; }
+.inp-wrap input { margin-bottom: 0; }
+.btn-main { width: 100%; background: #C8A84B; color: #2D3A1E; border: none; border-radius: 8px; padding: 12px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; transition: opacity 0.15s; margin-top: 4px; }
+.btn-main:hover { opacity: 0.85; }
+.btn-main:disabled { opacity: 0.4; cursor: not-allowed; }
+.note { font-size: 12px; color: #B8A882; text-align: center; margin-top: 12px; line-height: 1.5; }
+.error-msg { font-size: 12px; color: #8B3A1E; background: #FDF0E8; border-radius: 6px; padding: 8px 12px; margin-bottom: 12px; display: none; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">Costax</div>
+  <div class="step-line">
+    <div class="step done"><div class="step-dot"></div>Вход</div>
+    <div class="step-sep"></div>
+    <div class="step active"><div class="step-dot"></div>Профиль</div>
+    <div class="step-sep"></div>
+    <div class="step"><div class="step-dot"></div>Лента</div>
+  </div>
+  <h1>Твой профиль</h1>
+  <p class="sub">Как тебя будут видеть в ленте</p>
+
+  <div class="avatar-wrap">
+    <div class="avatar-circle" id="avatar-circle" onclick="document.getElementById('photo-inp').click()">М</div>
+    <input type="file" id="photo-inp" accept="image/*" style="display:none" onchange="previewPhoto(this)">
+    <div class="av-hint">
+      <b>Фото профиля</b>
+      <span>Нажми чтобы загрузить</span>
+    </div>
+  </div>
+
+  <div id="error-msg" class="error-msg"></div>
+
+  <label>Имя</label>
+  <input type="text" id="inp-name" placeholder="Иван Петров" maxlength="40">
+
+  <label>Username</label>
+  <div class="inp-wrap">
+    <span class="inp-prefix">@</span>
+    <input type="text" id="inp-username" placeholder="ivan" class="prefix" maxlength="20" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')">
+  </div>
+
+  <label>Email</label>
+  <input type="email" id="inp-email" class="readonly" readonly>
+
+  <button class="btn-main" id="btn-save" onclick="saveProfile()">Сохранить и войти в ленту</button>
+  <p class="note">Можно изменить в любой момент</p>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCeveXncaJYszckdflfTVWCDc0AwNilR9k",
+  authDomain: "costax-aed53.firebaseapp.com",
+  projectId: "costax-aed53",
+  storageBucket: "costax-aed53.firebasestorage.app",
+  messagingSenderId: "747179946604",
+  appId: "1:747179946604:web:073d7faf7d80fb40041e49"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+let currentUser = null;
+let photoFile = null;
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = '/login'; return; }
+  currentUser = user;
+  document.getElementById('inp-email').value = user.email || '';
+  const profileDoc = await getDoc(doc(db, 'users', user.uid));
+  if (profileDoc.exists() && !window.location.search.includes('setup')) {
+    const d = profileDoc.data();
+    document.getElementById('inp-name').value = d.name || '';
+    document.getElementById('inp-username').value = d.username || '';
+    if (d.photoURL) {
+      document.getElementById('avatar-circle').innerHTML = `<img src="${d.photoURL}">`;
+    } else {
+      document.getElementById('avatar-circle').textContent = (d.name || 'U')[0].toUpperCase();
+    }
+  } else {
+    const initials = (user.email || 'U')[0].toUpperCase();
+    document.getElementById('avatar-circle').textContent = initials;
+  }
+});
+
+window.previewPhoto = function(inp) {
+  if (inp.files && inp.files[0]) {
+    photoFile = inp.files[0];
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('avatar-circle').innerHTML = `<img src="${e.target.result}">`;
+    };
+    reader.readAsDataURL(inp.files[0]);
+  }
+};
+
+window.saveProfile = async function() {
+  const name = document.getElementById('inp-name').value.trim();
+  const username = document.getElementById('inp-username').value.trim();
+  if (!name) { showError('Введи имя'); return; }
+  if (!username) { showError('Введи username'); return; }
+  if (username.length < 3) { showError('Username минимум 3 символа'); return; }
+
+  const btn = document.getElementById('btn-save');
+  btn.disabled = true;
+  btn.textContent = 'Сохраняем...';
+
+  try {
+    let photoURL = null;
+    if (photoFile) {
+      const storageRef = ref(storage, `avatars/${currentUser.uid}`);
+      await uploadBytes(storageRef, photoFile);
+      photoURL = await getDownloadURL(storageRef);
+    } else {
+      const existing = await getDoc(doc(db, 'users', currentUser.uid));
+      if (existing.exists()) photoURL = existing.data().photoURL || null;
+    }
+
+    await setDoc(doc(db, 'users', currentUser.uid), {
+      name, username, photoURL,
+      email: currentUser.email,
+      updatedAt: new Date()
+    });
+
+    window.location.href = '/';
+  } catch (e) {
+    showError('Ошибка: ' + e.message);
+    btn.disabled = false;
+    btn.textContent = 'Сохранить и войти в ленту';
+  }
+};
+
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4000);
+}
+</script>
+</body>
+</html>
