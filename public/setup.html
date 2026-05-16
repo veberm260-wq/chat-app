@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Costax — Выбор ника</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0A0B0F;
+      color: #E8E9EC;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      background: #11141F;
+      padding: 40px 30px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+    .logo-circle {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #6366F1, #4F46E5);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: white;
+    }
+    h1 { font-size: 28px; margin-bottom: 8px; }
+    p { color: #9CA3AF; margin-bottom: 30px; }
+    input {
+      width: 100%;
+      padding: 16px;
+      background: #1A1F2E;
+      border: 1px solid #374151;
+      border-radius: 12px;
+      color: white;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    button {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #6366F1, #4F46E5);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .error { color: #EF4444; margin: 10px 0; min-height: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <div class="logo-circle">C</div>
+      <h1>Costax</h1>
+    </div>
+    
+    <h1>Придумай никнейм</h1>
+    <p>Это будет твой @username на Costax</p>
+
+    <input type="text" id="username" placeholder="@никнейм" maxlength="20" autocomplete="off">
+    <div id="error" class="error"></div>
+    <button onclick="saveUsername()">Продолжить</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      // ←←← ВСТАВЬ СЮДА СВОЙ firebaseConfig !!!
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = '/login.html';
+        return;
+      }
+      currentUser = user;
+    });
+
+    window.saveUsername = async () => {
+      const usernameInput = document.getElementById('username');
+      const username = usernameInput.value.trim().toLowerCase();
+      const errorEl = document.getElementById('error');
+
+      if (username.length < 3) {
+        errorEl.textContent = "Ник должен быть минимум 3 символа";
+        return;
+      }
+      if (!/^[a-z0-9_]+$/.test(username)) {
+        errorEl.textContent = "Только латинские буквы, цифры и нижнее подчёркивание";
+        return;
+      }
+
+      try {
+        // Проверяем, занят ли ник
+        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+        if (userDoc.exists() && userDoc.data().username) {
+          window.location.href = '/';
+          return;
+        }
+
+        await setDoc(doc(db, "users", currentUser.uid), {
+          username: username,
+          displayName: username,
+          createdAt: new Date()
+        }, { merge: true });
+
+        window.location.href = '/';
+      } catch (err) {
+        console.error(err);
+        errorEl.textContent = "Этот ник уже занят или ошибка. Попробуй другой.";
+      }
+    };
+  </script>
+</body>
+</html>
