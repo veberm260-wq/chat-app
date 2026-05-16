@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Costax — Профиль</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #0F1117; color: #E8E9EC; height: 100vh; display: flex; overflow: hidden; }
+
+.sidebar { width: 220px; min-width: 220px; background: #0F1117; border-right: 0.5px solid #1E2030; display: flex; flex-direction: column; padding: 24px 14px; gap: 2px; height: 100vh; }
+.s-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; padding: 0 10px; }
+.s-logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, #6C63FF, #4A90E2); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.s-logo-text { font-size: 18px; font-weight: 700; color: #E8E9EC; letter-spacing: -0.02em; }
+.s-item { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 10px; font-size: 14px; color: #8B8FA8; cursor: pointer; transition: all 0.15s; text-decoration: none; }
+.s-item:hover { background: #1A1D2E; color: #E8E9EC; }
+.s-item.active { background: #1A1D2E; color: #E8E9EC; font-weight: 500; }
+.s-item i { font-size: 18px; }
+.s-divider { height: 0.5px; background: #1E2030; margin: 10px 0; }
+.s-bottom { margin-top: auto; }
+.s-user { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; cursor: pointer; }
+.s-user:hover { background: #1A1D2E; }
+.s-av { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #6C63FF, #4A90E2); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: white; flex-shrink: 0; }
+.s-name { font-size: 13px; color: #E8E9EC; font-weight: 500; }
+.s-handle { font-size: 11px; color: #8B8FA8; }
+
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.topbar { padding: 13px 20px; border-bottom: 0.5px solid #1E2030; background: #0F1117; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.back-btn { background: none; border: none; color: #6C63FF; cursor: pointer; font-size: 20px; padding: 0; display: flex; align-items: center; }
+.topbar-title { font-size: 15px; font-weight: 600; color: #E8E9EC; }
+
+.content { flex: 1; overflow-y: auto; max-width: 640px; width: 100%; }
+
+/* Profile header */
+.profile-header { padding: 24px 20px; border-bottom: 0.5px solid #1E2030; }
+.profile-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
+.profile-av { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #6C63FF, #4A90E2); display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; color: white; flex-shrink: 0; overflow: hidden; }
+.profile-av img { width: 100%; height: 100%; object-fit: cover; }
+.btn-msg { background: linear-gradient(135deg, #6C63FF, #4A90E2); color: white; border: none; border-radius: 20px; padding: 8px 20px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
+.btn-msg:hover { opacity: 0.85; }
+.btn-edit { background: transparent; color: #E8E9EC; border: 0.5px solid #2A2D40; border-radius: 20px; padding: 8px 20px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+.btn-edit:hover { border-color: #6C63FF; color: #6C63FF; }
+.profile-name { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.profile-name h1 { font-size: 20px; font-weight: 700; color: #E8E9EC; }
+.verified { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; background: #4A90E2; border-radius: 50%; flex-shrink: 0; }
+.verified svg { width: 10px; height: 10px; }
+.profile-handle { font-size: 14px; color: #8B8FA8; margin-bottom: 10px; }
+.profile-bio { font-size: 14px; color: #C8CAD8; line-height: 1.6; margin-bottom: 12px; }
+.profile-stats { display: flex; gap: 20px; }
+.stat { font-size: 13px; color: #8B8FA8; }
+.stat b { color: #E8E9EC; font-weight: 600; }
+
+/* Posts */
+.posts-label { padding: 14px 20px; border-bottom: 0.5px solid #1E2030; font-size: 13px; font-weight: 600; color: #E8E9EC; }
+.post { padding: 16px 20px; border-bottom: 0.5px solid #1E2030; transition: background 0.1s; }
+.post:hover { background: #13151F; }
+.post-text { font-size: 14px; color: #C8CAD8; line-height: 1.6; margin-bottom: 10px; word-break: break-word; }
+.post-actions { display: flex; gap: 4px; }
+.p-action { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #4A4D60; cursor: pointer; background: none; border: none; font-family: inherit; padding: 5px 10px; border-radius: 20px; transition: all 0.15s; }
+.p-action:hover { color: #6C63FF; background: rgba(108,99,255,0.1); }
+.p-action.liked { color: #E25B5B; }
+.p-action i { font-size: 15px; }
+.p-time { font-size: 12px; color: #4A4D60; margin-bottom: 6px; }
+.empty { padding: 40px 20px; text-align: center; color: #4A4D60; font-size: 14px; }
+.loading { padding: 40px 20px; text-align: center; color: #4A4D60; font-size: 14px; }
+
+/* Mobile */
+.mob-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #0F1117; border-top: 0.5px solid #1E2030; z-index: 100; padding: 8px 0 max(8px, env(safe-area-inset-bottom)); }
+.mob-nav-inner { display: flex; justify-content: space-around; }
+.mob-item { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 16px; color: #4A4D60; text-decoration: none; font-size: 10px; }
+.mob-item.active { color: #6C63FF; }
+.mob-item i { font-size: 22px; }
+
+@media (max-width: 640px) {
+  .sidebar { display: none; }
+  .mob-nav { display: block; }
+  .main { padding-bottom: 60px; }
+}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="s-logo">
+    <div class="s-logo-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    </div>
+    <div class="s-logo-text">Costax</div>
+  </div>
+  <a class="s-item" href="/"><i class="ti ti-home"></i>Главная</a>
+  <a class="s-item" href="/messages.html"><i class="ti ti-message"></i>Сообщения</a>
+  <a class="s-item active" href="/profile.html"><i class="ti ti-user"></i>Профиль</a>
+  <div class="s-divider"></div>
+  <div class="s-bottom">
+    <div class="s-user" onclick="window.location.href='/profile.html'">
+      <div class="s-av" id="sidebar-av">М</div>
+      <div>
+        <div class="s-name" id="sidebar-name">...</div>
+        <div class="s-handle" id="sidebar-handle">@...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <button class="back-btn" onclick="history.back()"><i class="ti ti-arrow-left"></i></button>
+    <div class="topbar-title" id="topbar-name">Профиль</div>
+  </div>
+
+  <div class="content">
+    <div class="profile-header" id="profile-header">
+      <div class="loading">Загрузка...</div>
+    </div>
+    <div class="posts-label" id="posts-label" style="display:none">Посты</div>
+    <div id="posts-list"><div class="loading">Загрузка постов...</div></div>
+  </div>
+</div>
+
+<nav class="mob-nav">
+  <div class="mob-nav-inner">
+    <a class="mob-item" href="/"><i class="ti ti-home"></i>Лента</a>
+    <a class="mob-item" href="/messages.html"><i class="ti ti-message"></i>Чаты</a>
+    <a class="mob-item active" href="/profile.html"><i class="ti ti-user"></i>Профиль</a>
+  </div>
+</nav>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, query, doc, getDoc, getDocs, updateDoc, arrayUnion, arrayRemove, where, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCeveXncaJYszckdflfTVWCDc0AwNilR9k",
+  authDomain: "costax-aed53.firebaseapp.com",
+  projectId: "costax-aed53",
+  storageBucket: "costax-aed53.firebasestorage.app",
+  messagingSenderId: "747179946604",
+  appId: "1:747179946604:web:073d7faf7d80fb40041e49"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let me = null;
+const checkSvg = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+// uid из URL — если нет, показываем свой профиль
+const params = new URLSearchParams(window.location.search);
+const targetUid = params.get('uid');
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = '/login'; return; }
+  me = user;
+
+  const myDoc = await getDoc(doc(db, 'users', user.uid));
+  if (!myDoc.exists()) { window.location.href = '/profile.html?setup=1'; return; }
+  const myProfile = myDoc.data();
+  document.getElementById('sidebar-av').textContent = (myProfile.name||'U')[0].toUpperCase();
+  document.getElementById('sidebar-name').textContent = myProfile.name||'';
+  document.getElementById('sidebar-handle').textContent = '@'+(myProfile.username||'');
+
+  const uid = targetUid || user.uid;
+  const isMe = uid === user.uid;
+
+  const pd = await getDoc(doc(db, 'users', uid));
+  if (!pd.exists()) {
+    document.getElementById('profile-header').innerHTML = '<div class="empty">Пользователь не найден</div>';
+    return;
+  }
+
+  const p = pd.data();
+  document.getElementById('topbar-name').textContent = p.name || 'Профиль';
+
+  const avatarHtml = p.photoURL
+    ? `<img src="${p.photoURL}">`
+    : (p.name||'U')[0].toUpperCase();
+
+  const actionBtn = isMe
+    ? `<button class="btn-edit" onclick="window.location.href='/profile.html'"><i class="ti ti-edit" style="font-size:14px;margin-right:4px"></i>Редактировать</button>`
+    : `<button class="btn-msg" onclick="window.location.href='/messages.html?uid=${uid}'"><i class="ti ti-message" style="font-size:14px;margin-right:4px"></i>Написать</button>`;
+
+  // Считаем посты
+  const postsSnap = await getDocs(query(collection(db,'posts'), where('authorId','==',uid)));
+  const postCount = postsSnap.size;
+
+  document.getElementById('profile-header').innerHTML = `
+    <div class="profile-top">
+      <div class="profile-av">${avatarHtml}</div>
+      ${actionBtn}
+    </div>
+    <div class="profile-name">
+      <h1>${esc(p.name||'Пользователь')}</h1>
+      <span class="verified">${checkSvg}</span>
+    </div>
+    <div class="profile-handle">@${esc(p.username||'user')}</div>
+    <div class="profile-stats">
+      <div class="stat"><b>${postCount}</b> постов</div>
+    </div>
+  `;
+
+  document.getElementById('posts-label').style.display = 'block';
+  loadUserPosts(uid);
+});
+
+async function loadUserPosts(uid) {
+  const q = query(collection(db,'posts'), where('authorId','==',uid), orderBy('createdAt','desc'));
+  const snap = await getDocs(q);
+  const list = document.getElementById('posts-list');
+  if (snap.empty) { list.innerHTML = '<div class="empty">Нет постов</div>'; return; }
+  list.innerHTML = '';
+  snap.forEach(d => list.appendChild(renderPost(d.id, d.data())));
+}
+
+function renderPost(id, data) {
+  const liked = data.likes?.includes(me?.uid);
+  const count = data.likes?.length || 0;
+  const time = data.createdAt ? timeAgo(data.createdAt.toDate()) : '';
+  const div = document.createElement('div');
+  div.className = 'post';
+  div.innerHTML = `
+    <div class="p-time">${time}</div>
+    <div class="post-text">${esc(data.text)}</div>
+    <div class="post-actions">
+      <button class="p-action ${liked?'liked':''}" onclick="toggleLike('${id}',${liked})">
+        <i class="ti ti-heart"></i>${count}
+      </button>
+    </div>`;
+  return div;
+}
+
+window.toggleLike = async function(id, liked) {
+  if (!me) return;
+  const ref = doc(db,'posts',id);
+  if (liked) await updateDoc(ref, {likes: arrayRemove(me.uid)});
+  else await updateDoc(ref, {likes: arrayUnion(me.uid)});
+  const pd = await getDoc(ref);
+  // Обновить кнопку
+  const btn = document.querySelector(`[onclick="toggleLike('${id}',${liked})"]`);
+  if (btn && pd.exists()) {
+    const newLiked = pd.data().likes?.includes(me.uid);
+    const newCount = pd.data().likes?.length || 0;
+    btn.className = `p-action ${newLiked?'liked':''}`;
+    btn.innerHTML = `<i class="ti ti-heart"></i>${newCount}`;
+    btn.setAttribute('onclick', `toggleLike('${id}',${newLiked})`);
+  }
+};
+
+function timeAgo(d) {
+  const s = Math.floor((Date.now()-d)/1000);
+  if (s<60) return 'только что';
+  if (s<3600) return Math.floor(s/60)+' мин назад';
+  if (s<86400) return Math.floor(s/3600)+' ч назад';
+  return Math.floor(s/86400)+' д назад';
+}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body>
+</html>
