@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Costax — Вход</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    background: #F1EFE8;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .card {
+    background: #FAFAF8;
+    border: 0.5px solid #D3D1C7;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 380px;
+    padding: 44px 40px 40px;
+  }
+
+  .logo {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #888780;
+    margin-bottom: 36px;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 500;
+    color: #2C2C2A;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: #888780;
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    color: #5F5E5A;
+    margin-bottom: 6px;
+  }
+
+  input[type="email"] {
+    width: 100%;
+    border: 0.5px solid #D3D1C7;
+    border-radius: 8px;
+    padding: 11px 13px;
+    font-size: 14px;
+    color: #2C2C2A;
+    background: #FAFAF8;
+    outline: none;
+    transition: border-color 0.15s;
+    margin-bottom: 14px;
+    font-family: inherit;
+  }
+
+  input[type="email"]:focus {
+    border-color: #5F5E5A;
+  }
+
+  .code-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .code-row input {
+    flex: 1;
+    border: 0.5px solid #D3D1C7;
+    border-radius: 8px;
+    height: 50px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 500;
+    color: #2C2C2A;
+    background: #FAFAF8;
+    outline: none;
+    transition: border-color 0.15s;
+    font-family: inherit;
+  }
+
+  .code-row input:focus {
+    border-color: #2C2C2A;
+  }
+
+  .btn-main {
+    width: 100%;
+    background: #2C2C2A;
+    color: #F1EFE8;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: -0.01em;
+    transition: opacity 0.15s;
+    margin-bottom: 10px;
+  }
+
+  .btn-main:hover { opacity: 0.85; }
+  .btn-main:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-ghost {
+    width: 100%;
+    background: transparent;
+    border: 0.5px solid #D3D1C7;
+    border-radius: 8px;
+    padding: 11px;
+    font-size: 13px;
+    color: #888780;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.15s;
+    margin-bottom: 10px;
+  }
+
+  .btn-ghost:hover { border-color: #888780; }
+
+  .note {
+    font-size: 12px;
+    color: #B4B2A9;
+    text-align: center;
+    line-height: 1.5;
+    margin-top: 6px;
+  }
+
+  .back {
+    font-size: 12px;
+    color: #B4B2A9;
+    cursor: pointer;
+    margin-bottom: 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    font-family: inherit;
+    padding: 0;
+  }
+
+  .back:hover { color: #5F5E5A; }
+
+  .email-badge {
+    font-size: 13px;
+    color: #5F5E5A;
+    background: #F1EFE8;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 22px;
+  }
+
+  .success-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #EAF3DE;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+  }
+
+  .success-icon svg {
+    width: 22px;
+    height: 22px;
+    stroke: #3B6D11;
+    stroke-width: 2.5;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .error-msg {
+    font-size: 12px;
+    color: #A32D2D;
+    background: #FCEBEB;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    display: none;
+  }
+
+  /* Экраны */
+  #screen-1, #screen-2, #screen-3 { display: none; }
+  #screen-1.active, #screen-2.active, #screen-3.active { display: block; }
+
+  /* Спиннер */
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(241,239,232,0.3);
+    border-top-color: #F1EFE8;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #recaptcha-container { margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- Экран 1: Ввод email -->
+  <div id="screen-1" class="active">
+    <div class="logo">Costax</div>
+    <h1>Добро пожаловать</h1>
+    <p class="subtitle">Введи email — вышлем код для входа</p>
+    <div id="error-1" class="error-msg"></div>
+    <label>Email</label>
+    <input type="email" id="email-input" placeholder="ivan@mail.ru" autocomplete="email">
+    <div id="recaptcha-container"></div>
+    <button class="btn-main" id="btn-send" onclick="sendCode()">Отправить код</button>
+    <p class="note">Без пароля. Код действует 10 минут.</p>
+  </div>
+
+  <!-- Экран 2: Ввод кода -->
+  <div id="screen-2">
+    <button class="back" onclick="goBack()">← Назад</button>
+    <h1>Проверь почту</h1>
+    <p class="subtitle">Отправили код на</p>
+    <div class="email-badge" id="email-display"></div>
+    <div id="error-2" class="error-msg"></div>
+    <label>Код из письма</label>
+    <div class="code-row">
+      <input type="tel" maxlength="1" id="c1" oninput="nextDigit(this, 'c2')" onkeydown="prevDigit(event, null)">
+      <input type="tel" maxlength="1" id="c2" oninput="nextDigit(this, 'c3')" onkeydown="prevDigit(event, 'c1')">
+      <input type="tel" maxlength="1" id="c3" oninput="nextDigit(this, 'c4')" onkeydown="prevDigit(event, 'c2')">
+      <input type="tel" maxlength="1" id="c4" oninput="nextDigit(this, 'c5')" onkeydown="prevDigit(event, 'c3')">
+      <input type="tel" maxlength="1" id="c5" oninput="nextDigit(this, 'c6')" onkeydown="prevDigit(event, 'c4')">
+      <input type="tel" maxlength="1" id="c6" oninput="checkDone()" onkeydown="prevDigit(event, 'c5')">
+    </div>
+    <button class="btn-main" id="btn-verify" onclick="verifyCode()">Войти</button>
+    <button class="btn-ghost" onclick="resendCode()">Отправить снова</button>
+    <p class="note">Код действует 10 минут</p>
+  </div>
+
+  <!-- Экран 3: Успех -->
+  <div id="screen-3">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h1 style="text-align:center;margin-bottom:6px">Привет!</h1>
+    <p class="subtitle" style="text-align:center;margin-bottom:28px" id="welcome-msg">Ты вошёл успешно</p>
+    <button class="btn-main" onclick="goToChat()">Перейти в чат</button>
+  </div>
+
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getAuth,
+    sendSignInLinkToEmail,
+    isSignInWithEmailLink,
+    signInWithEmailLink
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCeveXncaJYszckdflfTVWCDc0AwNilR9k",
+    authDomain: "costax-aed53.firebaseapp.com",
+    projectId: "costax-aed53",
+    storageBucket: "costax-aed53.firebasestorage.app",
+    messagingSenderId: "747179946604",
+    appId: "1:747179946604:web:073d7faf7d80fb40041e49"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  const actionCodeSettings = {
+    url: 'https://costax.ru/login',
+    handleCodeInApp: true,
+  };
+
+  // Проверяем при загрузке — вдруг пользователь вернулся по ссылке из письма
+  if (isSignInWithEmailLink(auth, window.location.href)) {
+    let email = window.localStorage.getItem('emailForSignIn');
+    if (!email) {
+      email = window.prompt('Введи свой email для подтверждения:');
+    }
+    signInWithEmailLink(auth, email, window.location.href)
+      .then((result) => {
+        window.localStorage.removeItem('emailForSignIn');
+        showScreen3(result.user.email);
+      })
+      .catch((error) => {
+        showError('error-1', 'Ошибка входа: ' + error.message);
+      });
+  }
+
+  window.sendCode = function() {
+    const email = document.getElementById('email-input').value.trim();
+    if (!email) { showError('error-1', 'Введи email'); return; }
+
+    const btn = document.getElementById('btn-send');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Отправляем...';
+
+    sendSignInLinkToEmail(auth, email, actionCodeSettings)
+      .then(() => {
+        window.localStorage.setItem('emailForSignIn', email);
+        document.getElementById('email-display').textContent = email;
+        showScreen(2);
+      })
+      .catch((error) => {
+        btn.disabled = false;
+        btn.textContent = 'Отправить код';
+        showError('error-1', 'Ошибка: ' + error.message);
+      });
+  };
+
+  window.resendCode = function() {
+    const email = window.localStorage.getItem('emailForSignIn');
+    if (!email) { goBack(); return; }
+    sendSignInLinkToEmail(auth, email, actionCodeSettings)
+      .then(() => alert('Код отправлен повторно'))
+      .catch((e) => showError('error-2', e.message));
+  };
+
+  function showScreen3(email) {
+    document.getElementById('welcome-msg').textContent = 'Ты вошёл как ' + email;
+    showScreen(3);
+  }
+
+  window.goToChat = function() {
+    window.location.href = '/';
+  };
+</script>
+
+<script>
+  function showScreen(n) {
+    document.querySelectorAll('[id^="screen-"]').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + n).classList.add('active');
+  }
+
+  function goBack() {
+    showScreen(1);
+    document.getElementById('btn-send').disabled = false;
+    document.getElementById('btn-send').textContent = 'Отправить код';
+  }
+
+  function showError(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 5000);
+  }
+
+  function nextDigit(el, nextId) {
+    el.value = el.value.replace(/[^0-9]/g, '');
+    if (el.value.length === 1 && nextId) {
+      document.getElementById(nextId).focus();
+    }
+  }
+
+  function prevDigit(e, prevId) {
+    if (e.key === 'Backspace' && e.target.value === '' && prevId) {
+      document.getElementById(prevId).focus();
+    }
+  }
+
+  function getCode() {
+    return ['c1','c2','c3','c4','c5','c6'].map(id => document.getElementById(id).value).join('');
+  }
+
+  function checkDone() {
+    if (getCode().length === 6) setTimeout(verifyCode, 300);
+  }
+
+  // Заглушка — в реальности верификация идёт через ссылку из письма
+  function verifyCode() {
+    const code = getCode();
+    if (code.length < 6) { showError('error-2', 'Введи все 6 цифр'); return; }
+    showError('error-2', 'Перейди по ссылке из письма для входа');
+  }
+</script>
+
+</body>
+</html>
