@@ -6,98 +6,112 @@
 <title>Costax</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #F5F0E8; height: 100vh; display: flex; overflow: hidden; }
+body { font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #0F1117; color: #E8E9EC; height: 100vh; display: flex; overflow: hidden; }
 
-/* Mobile bottom nav */
-.mob-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #2D3A1E; border-top: 0.5px solid rgba(200,168,75,0.2); z-index: 100; padding: 8px 0 max(8px, env(safe-area-inset-bottom)); }
-.mob-nav-inner { display: flex; justify-content: space-around; }
-.mob-item { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 16px; color: #6B7A52; text-decoration: none; font-size: 10px; cursor: pointer; }
-.mob-item.active { color: #C8A84B; }
-.mob-item i { font-size: 22px; }
-
-/* Sidebar */
-.sidebar { width: 200px; min-width: 200px; background: #2D3A1E; display: flex; flex-direction: column; padding: 20px 14px; gap: 4px; height: 100vh; }
-.s-logo { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #C8A84B; margin-bottom: 24px; padding: 0 8px; }
-.s-item { display: flex; align-items: center; gap: 10px; padding: 10px 10px; border-radius: 8px; font-size: 13px; color: #9CAF7A; cursor: pointer; transition: background 0.15s; text-decoration: none; }
-.s-item:hover { background: rgba(200,168,75,0.1); color: #C8A84B; }
-.s-item.active { background: rgba(200,168,75,0.15); color: #C8A84B; font-weight: 500; }
-.s-item i { font-size: 17px; }
-.s-divider { height: 0.5px; background: rgba(255,255,255,0.08); margin: 8px 0; }
+.sidebar { width: 220px; min-width: 220px; background: #0F1117; border-right: 0.5px solid #1E2030; display: flex; flex-direction: column; padding: 24px 14px; gap: 2px; height: 100vh; }
+.s-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; padding: 0 10px; }
+.s-logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, #6C63FF, #4A90E2); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.s-logo-text { font-size: 18px; font-weight: 700; color: #E8E9EC; letter-spacing: -0.02em; }
+.s-item { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 10px; font-size: 14px; color: #8B8FA8; cursor: pointer; transition: all 0.15s; text-decoration: none; }
+.s-item:hover { background: #1A1D2E; color: #E8E9EC; }
+.s-item.active { background: #1A1D2E; color: #E8E9EC; font-weight: 500; }
+.s-item i { font-size: 18px; }
+.s-divider { height: 0.5px; background: #1E2030; margin: 10px 0; }
 .s-bottom { margin-top: auto; }
-.s-user { display: flex; align-items: center; gap: 8px; padding: 10px 10px; border-radius: 8px; cursor: pointer; }
-.s-user:hover { background: rgba(255,255,255,0.05); }
-.s-av { width: 32px; height: 32px; border-radius: 50%; background: #C8A84B; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #2D3A1E; flex-shrink: 0; overflow: hidden; }
-.s-av img { width: 100%; height: 100%; object-fit: cover; }
-.s-info { overflow: hidden; }
-.s-name { font-size: 12px; color: #E8E0CC; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.s-handle { font-size: 11px; color: #6B7A52; }
+.s-user { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; cursor: pointer; }
+.s-user:hover { background: #1A1D2E; }
+.s-av { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #6C63FF, #4A90E2); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: white; flex-shrink: 0; }
+.s-name { font-size: 13px; color: #E8E9EC; font-weight: 500; }
+.s-handle { font-size: 11px; color: #8B8FA8; }
 
-/* Main */
-.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-.topbar { padding: 13px 20px; border-bottom: 0.5px solid #DDD5C0; background: #FDFAF4; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-.topbar-title { font-size: 15px; font-weight: 600; color: #2D3A1E; }
-.search-wrap { position: relative; }
-.search-inp { background: #F5F0E8; border: 0.5px solid #DDD5C0; border-radius: 8px; padding: 7px 12px 7px 32px; font-size: 13px; color: #2D3A1E; outline: none; width: 200px; font-family: inherit; }
-.search-inp::placeholder { color: #B8A882; }
-.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #B8A882; pointer-events: none; }
-.search-results { position: absolute; top: 36px; right: 0; width: 240px; background: #FDFAF4; border: 0.5px solid #DDD5C0; border-radius: 10px; padding: 6px; z-index: 100; display: none; }
-.search-results.show { display: block; }
-.s-result { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 7px; cursor: pointer; }
-.s-result:hover { background: #F5F0E8; }
-.sr-av { width: 28px; height: 28px; border-radius: 50%; background: #C8A84B; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #2D3A1E; flex-shrink: 0; }
-.sr-name { font-size: 13px; font-weight: 500; color: #2D3A1E; }
-.sr-handle { font-size: 11px; color: #B8A882; }
+.main { flex: 1; display: flex; overflow: hidden; }
+.feed-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; border-right: 0.5px solid #1E2030; }
+.topbar { padding: 14px 20px; border-bottom: 0.5px solid #1E2030; background: rgba(15,17,23,0.95); display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
+.tab { font-size: 14px; color: #8B8FA8; cursor: pointer; padding-bottom: 4px; }
+.tab.active { color: #E8E9EC; font-weight: 600; border-bottom: 2px solid #6C63FF; }
+.feed { flex: 1; overflow-y: auto; }
 
-.feed { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; max-width: 640px; width: 100%; }
-
-/* Compose */
-.compose { background: #FDFAF4; border: 0.5px solid #DDD5C0; border-radius: 12px; padding: 14px 16px; }
-.compose-top { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
-.c-av { width: 34px; height: 34px; border-radius: 50%; background: #C8A84B; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #2D3A1E; flex-shrink: 0; overflow: hidden; }
-.c-av img { width: 100%; height: 100%; object-fit: cover; }
-.c-textarea { flex: 1; border: none; background: transparent; font-size: 14px; color: #2D3A1E; outline: none; resize: none; font-family: inherit; line-height: 1.6; min-height: 48px; }
-.c-textarea::placeholder { color: #B8A882; }
-.compose-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 0.5px solid #EEE8D8; }
-.c-count { font-size: 12px; color: #B8A882; }
-.btn-post { background: #C8A84B; color: #2D3A1E; border: none; border-radius: 8px; padding: 8px 20px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
-.btn-post:hover { opacity: 0.85; }
+.compose { padding: 16px 20px; border-bottom: 0.5px solid #1E2030; display: flex; gap: 12px; }
+.c-av { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #6C63FF, #4A90E2); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: white; flex-shrink: 0; }
+.compose-right { flex: 1; }
+.c-textarea { width: 100%; border: none; background: transparent; font-size: 15px; color: #E8E9EC; outline: none; resize: none; font-family: inherit; line-height: 1.6; min-height: 52px; }
+.c-textarea::placeholder { color: #4A4D60; }
+.compose-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 0.5px solid #1E2030; margin-top: 8px; }
+.c-count { font-size: 12px; color: #4A4D60; }
+.btn-post { background: linear-gradient(135deg, #6C63FF, #4A90E2); color: white; border: none; border-radius: 20px; padding: 8px 20px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-post:hover { opacity: 0.88; }
 .btn-post:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* Post */
-.post { background: #FDFAF4; border: 0.5px solid #DDD5C0; border-radius: 12px; padding: 14px 16px; transition: border-color 0.15s; }
-.post:hover { border-color: #C8A84B; }
-.post-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.p-av { width: 34px; height: 34px; border-radius: 50%; background: #C8A84B; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #2D3A1E; flex-shrink: 0; overflow: hidden; }
-.p-av img { width: 100%; height: 100%; object-fit: cover; }
-.p-name { font-size: 13px; font-weight: 600; color: #2D3A1E; }
-.p-handle { font-size: 12px; color: #B8A882; }
-.p-time { font-size: 11px; color: #B8A882; margin-left: auto; }
-.post-text { font-size: 14px; color: #3D4A2E; line-height: 1.6; margin-bottom: 10px; word-break: break-word; }
-.post-actions { display: flex; gap: 16px; }
-.p-action { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #B8A882; cursor: pointer; transition: color 0.15s; background: none; border: none; font-family: inherit; padding: 0; }
-.p-action:hover { color: #C8A84B; }
-.p-action.liked { color: #C8A84B; }
-.p-action i { font-size: 14px; }
+.post { padding: 16px 20px; border-bottom: 0.5px solid #1E2030; transition: background 0.1s; }
+.post:hover { background: #13151F; }
+.post-inner { display: flex; gap: 10px; }
+.p-av { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #6C63FF, #4A90E2); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: white; flex-shrink: 0; }
+.p-body { flex: 1; min-width: 0; }
+.p-name-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-bottom: 4px; }
+.p-name { font-size: 14px; font-weight: 600; color: #E8E9EC; }
+.verified { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; background: #4A90E2; border-radius: 50%; flex-shrink: 0; }
+.verified svg { width: 9px; height: 9px; }
+.p-handle { font-size: 13px; color: #8B8FA8; }
+.p-dot { color: #4A4D60; font-size: 11px; }
+.p-time { font-size: 12px; color: #4A4D60; }
+.post-text { font-size: 14px; color: #C8CAD8; line-height: 1.6; margin-bottom: 10px; word-break: break-word; }
+.post-actions { display: flex; gap: 4px; }
+.p-action { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #4A4D60; cursor: pointer; background: none; border: none; font-family: inherit; padding: 5px 10px; border-radius: 20px; transition: all 0.15s; }
+.p-action:hover { color: #6C63FF; background: rgba(108,99,255,0.1); }
+.p-action.liked { color: #E25B5B; }
+.p-action i { font-size: 15px; }
 
-.empty { text-align: center; padding: 40px 20px; color: #B8A882; font-size: 14px; }
+.right-panel { width: 290px; min-width: 290px; padding: 16px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+.r-search { display: flex; align-items: center; gap: 8px; background: #1A1D2E; border-radius: 20px; padding: 9px 14px; }
+.r-search input { flex: 1; border: none; background: transparent; font-size: 13px; color: #E8E9EC; outline: none; font-family: inherit; }
+.r-search input::placeholder { color: #4A4D60; }
+.r-search i { font-size: 15px; color: #4A4D60; }
+.r-card { background: #1A1D2E; border-radius: 14px; padding: 14px 16px; }
+.r-card-title { font-size: 15px; font-weight: 700; color: #E8E9EC; margin-bottom: 12px; }
+.r-user { display: flex; align-items: center; gap: 10px; padding: 7px 0; cursor: pointer; border-radius: 8px; }
+.r-user:hover .ru-name { color: #6C63FF; }
+.ru-av { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #6C63FF, #4A90E2); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; flex-shrink: 0; }
+.ru-name { font-size: 13px; font-weight: 500; color: #E8E9EC; display: flex; align-items: center; gap: 4px; transition: color 0.15s; }
+.ru-handle { font-size: 12px; color: #8B8FA8; }
+.search-dropdown { background: #1A1D2E; border-radius: 12px; padding: 6px; display: none; margin-top: 8px; }
+.search-dropdown.show { display: block; }
+.sd-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; }
+.sd-item:hover { background: #232640; }
+.empty { padding: 40px 20px; text-align: center; color: #4A4D60; font-size: 14px; }
 
-/* Loading */
-.loading { text-align: center; padding: 20px; color: #B8A882; font-size: 13px; }
+.mob-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #0F1117; border-top: 0.5px solid #1E2030; z-index: 100; padding: 8px 0 max(8px, env(safe-area-inset-bottom)); }
+.mob-nav-inner { display: flex; justify-content: space-around; }
+.mob-item { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 16px; color: #4A4D60; text-decoration: none; font-size: 10px; }
+.mob-item.active { color: #6C63FF; }
+.mob-item i { font-size: 22px; }
+
+@media (max-width: 900px) { .right-panel { display: none; } }
+@media (max-width: 640px) {
+  .sidebar { display: none; }
+  .mob-nav { display: block; }
+  .main { padding-bottom: 60px; }
+}
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 </head>
 <body>
 
 <div class="sidebar">
-  <div class="s-logo">Costax</div>
-  <a class="s-item active" href="/"><i class="ti ti-home"></i>Лента</a>
+  <div class="s-logo">
+    <div class="s-logo-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    </div>
+    <div class="s-logo-text">Costax</div>
+  </div>
+  <a class="s-item active" href="/"><i class="ti ti-home"></i>Главная</a>
+  <a class="s-item" href="/messages.html"><i class="ti ti-message"></i>Сообщения</a>
   <a class="s-item" href="/profile.html"><i class="ti ti-user"></i>Профиль</a>
   <div class="s-divider"></div>
   <div class="s-bottom">
     <div class="s-user" onclick="window.location.href='/profile.html'">
       <div class="s-av" id="sidebar-av">М</div>
-      <div class="s-info">
-        <div class="s-name" id="sidebar-name">Загрузка...</div>
+      <div>
+        <div class="s-name" id="sidebar-name">...</div>
         <div class="s-handle" id="sidebar-handle">@...</div>
       </div>
     </div>
@@ -105,58 +119,51 @@ body { font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #F5
 </div>
 
 <div class="main">
-  <div class="topbar">
-    <div class="topbar-title">Лента</div>
-    <div class="search-wrap">
-      <i class="ti ti-search search-icon"></i>
-      <input class="search-inp" type="text" placeholder="Найти @username" id="search-inp" oninput="searchUsers(this.value)" onblur="setTimeout(()=>hideSearch(),200)">
-      <div class="search-results" id="search-results"></div>
+  <div class="feed-col">
+    <div class="topbar">
+      <div class="tab active">Главная</div>
+      <div style="margin-left:auto;font-size:12px;color:#4A4D60" id="post-count"></div>
+    </div>
+    <div class="feed">
+      <div class="compose">
+        <div class="c-av" id="compose-av">М</div>
+        <div class="compose-right">
+          <textarea class="c-textarea" id="post-text" placeholder="Что у тебя нового?" oninput="updateCount()" maxlength="280"></textarea>
+          <div class="compose-bottom">
+            <span class="c-count" id="char-count">280</span>
+            <button class="btn-post" id="btn-post" onclick="publishPost()">Опубликовать</button>
+          </div>
+        </div>
+      </div>
+      <div id="posts-list"><div class="empty">Загрузка...</div></div>
     </div>
   </div>
 
-  <div class="feed">
-    <div class="compose">
-      <div class="compose-top">
-        <div class="c-av" id="compose-av">М</div>
-        <textarea class="c-textarea" id="post-text" placeholder="Что происходит?" oninput="updateCount()" maxlength="280"></textarea>
-      </div>
-      <div class="compose-bottom">
-        <span class="c-count" id="char-count">280</span>
-        <button class="btn-post" id="btn-post" onclick="publishPost()">Опубликовать</button>
-      </div>
+  <div class="right-panel">
+    <div class="r-search">
+      <i class="ti ti-search"></i>
+      <input type="text" id="search-inp" placeholder="Поиск пользователей" oninput="searchUsers(this.value)" onblur="setTimeout(hideSearch,200)">
     </div>
-    <div id="posts-list"><div class="loading">Загрузка...</div></div>
+    <div class="search-dropdown" id="search-dropdown"></div>
+    <div class="r-card">
+      <div class="r-card-title">Пользователи</div>
+      <div id="users-list"></div>
+    </div>
   </div>
 </div>
 
-
-<!-- Мобильная навигация снизу -->
 <nav class="mob-nav">
   <div class="mob-nav-inner">
     <a class="mob-item active" href="/"><i class="ti ti-home"></i>Лента</a>
-    <a class="mob-item" href="#"><i class="ti ti-search"></i>Поиск</a>
+    <a class="mob-item" href="/messages.html"><i class="ti ti-message"></i>Чаты</a>
     <a class="mob-item" href="/profile.html"><i class="ti ti-user"></i>Профиль</a>
   </div>
 </nav>
 
-<style>
-@media (max-width: 640px) {
-  body { overflow: auto; flex-direction: column; height: auto; min-height: 100vh; }
-  .sidebar { display: none; }
-  .mob-nav { display: block; }
-  .main { height: 100vh; padding-bottom: 70px; }
-  .feed { max-width: 100%; padding: 12px; }
-  .topbar { padding: 12px 14px; }
-  .search-inp { width: 130px; }
-  .compose { border-radius: 10px; }
-  .post { border-radius: 10px; }
-}
-</style>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, doc, getDoc, getDocs, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, doc, getDoc, getDocs, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCeveXncaJYszckdflfTVWCDc0AwNilR9k",
@@ -170,153 +177,135 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+let me = null, myProfile = null;
 
-let currentUser = null;
-let currentProfile = null;
+const checkSvg = `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+const verifiedBadge = `<span class="verified">${checkSvg}</span>`;
 
 onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = '/login';
-    return;
-  }
-  currentUser = user;
-  const profileDoc = await getDoc(doc(db, 'users', user.uid));
-  if (!profileDoc.exists()) {
-    window.location.href = '/profile.html?setup=1';
-    return;
-  }
-  currentProfile = profileDoc.data();
-  updateSidebar();
+  if (!user) { window.location.href = '/login'; return; }
+  me = user;
+  const pd = await getDoc(doc(db, 'users', user.uid));
+  if (!pd.exists()) { window.location.href = '/profile.html?setup=1'; return; }
+  myProfile = pd.data();
+  const init = (myProfile.name||'U')[0].toUpperCase();
+  document.getElementById('sidebar-av').textContent = init;
+  document.getElementById('sidebar-name').textContent = myProfile.name||'';
+  document.getElementById('sidebar-handle').textContent = '@'+(myProfile.username||'');
+  document.getElementById('compose-av').textContent = init;
   loadFeed();
+  loadUsers();
 });
-
-function updateSidebar() {
-  const p = currentProfile;
-  document.getElementById('sidebar-name').textContent = p.name || 'Без имени';
-  document.getElementById('sidebar-handle').textContent = '@' + (p.username || '...');
-  const initials = (p.name || 'U')[0].toUpperCase();
-  const av = document.getElementById('sidebar-av');
-  const cav = document.getElementById('compose-av');
-  if (p.photoURL) {
-    av.innerHTML = `<img src="${p.photoURL}">`;
-    cav.innerHTML = `<img src="${p.photoURL}">`;
-  } else {
-    av.textContent = initials;
-    cav.textContent = initials;
-  }
-}
 
 function loadFeed() {
   const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
-  onSnapshot(q, (snap) => {
+  onSnapshot(q, snap => {
+    document.getElementById('post-count').textContent = snap.size + ' постов';
     const list = document.getElementById('posts-list');
-    if (snap.empty) {
-      list.innerHTML = '<div class="empty">Пока нет постов — напиши первый!</div>';
-      return;
-    }
+    if (snap.empty) { list.innerHTML = '<div class="empty">Пока нет постов!</div>'; return; }
     list.innerHTML = '';
-    snap.forEach(d => {
-      list.appendChild(renderPost(d.id, d.data()));
-    });
+    snap.forEach(d => list.appendChild(renderPost(d.id, d.data())));
   });
 }
 
 function renderPost(id, data) {
+  const liked = data.likes?.includes(me?.uid);
+  const count = data.likes?.length || 0;
+  const init = (data.authorName||'U')[0].toUpperCase();
+  const time = data.createdAt ? timeAgo(data.createdAt.toDate()) : '';
+  const badge = data.verified ? verifiedBadge : '';
   const div = document.createElement('div');
   div.className = 'post';
-  const liked = data.likes && currentUser && data.likes.includes(currentUser.uid);
-  const likesCount = data.likes ? data.likes.length : 0;
-  const initials = (data.authorName || 'U')[0].toUpperCase();
-  const avatarHtml = data.authorPhoto
-    ? `<img src="${data.authorPhoto}">`
-    : initials;
-  const time = data.createdAt ? timeAgo(data.createdAt.toDate()) : '';
   div.innerHTML = `
-    <div class="post-header">
-      <div class="p-av">${avatarHtml}</div>
-      <div>
-        <div class="p-name">${esc(data.authorName || 'Аноним')}</div>
-        <div class="p-handle">@${esc(data.authorUsername || 'user')}</div>
+    <div class="post-inner">
+      <div class="p-av">${init}</div>
+      <div class="p-body">
+        <div class="p-name-row">
+          <span class="p-name">${esc(data.authorName||'Аноним')}</span>
+          ${badge}
+          <span class="p-handle">@${esc(data.authorUsername||'user')}</span>
+          <span class="p-dot">·</span>
+          <span class="p-time">${time}</span>
+        </div>
+        <div class="post-text">${esc(data.text)}</div>
+        <div class="post-actions">
+          <button class="p-action ${liked?'liked':''}" onclick="toggleLike('${id}',${liked})">
+            <i class="ti ti-heart"></i>${count}
+          </button>
+          <button class="p-action" onclick="window.location.href='/messages.html?uid=${data.authorId}'">
+            <i class="ti ti-message-circle"></i>
+          </button>
+        </div>
       </div>
-      <div class="p-time">${time}</div>
-    </div>
-    <div class="post-text">${esc(data.text)}</div>
-    <div class="post-actions">
-      <button class="p-action ${liked ? 'liked' : ''}" onclick="toggleLike('${id}', ${liked})">
-        <i class="ti ti-heart"></i>${likesCount}
-      </button>
-    </div>
-  `;
+    </div>`;
   return div;
+}
+
+async function loadUsers() {
+  const snap = await getDocs(query(collection(db, 'users'), limit(10)));
+  const list = document.getElementById('users-list');
+  list.innerHTML = '';
+  snap.forEach(d => {
+    if (d.id === me?.uid) return;
+    const u = d.data();
+    const badge = u.verified ? verifiedBadge : '';
+    const div = document.createElement('div');
+    div.className = 'r-user';
+    div.innerHTML = `<div class="ru-av">${(u.name||'U')[0].toUpperCase()}</div><div><div class="ru-name">${esc(u.name)}${badge}</div><div class="ru-handle">@${esc(u.username)}</div></div>`;
+    div.onclick = () => window.location.href = '/messages.html?uid='+d.id;
+    list.appendChild(div);
+  });
 }
 
 window.publishPost = async function() {
   const text = document.getElementById('post-text').value.trim();
-  if (!text || !currentProfile) return;
+  if (!text || !myProfile) return;
   const btn = document.getElementById('btn-post');
   btn.disabled = true;
   await addDoc(collection(db, 'posts'), {
-    text,
-    authorId: currentUser.uid,
-    authorName: currentProfile.name,
-    authorUsername: currentProfile.username,
-    authorPhoto: currentProfile.photoURL || null,
-    likes: [],
-    createdAt: serverTimestamp()
+    text, authorId: me.uid, authorName: myProfile.name,
+    authorUsername: myProfile.username, verified: myProfile.verified||false,
+    likes: [], createdAt: serverTimestamp()
   });
   document.getElementById('post-text').value = '';
   document.getElementById('char-count').textContent = '280';
   btn.disabled = false;
 };
 
-window.toggleLike = async function(postId, isLiked) {
-  if (!currentUser) return;
-  const ref = doc(db, 'posts', postId);
-  if (isLiked) {
-    await updateDoc(ref, { likes: arrayRemove(currentUser.uid) });
-  } else {
-    await updateDoc(ref, { likes: arrayUnion(currentUser.uid) });
-  }
+window.toggleLike = async function(id, liked) {
+  if (!me) return;
+  const ref = doc(db, 'posts', id);
+  if (liked) await updateDoc(ref, {likes: arrayRemove(me.uid)});
+  else await updateDoc(ref, {likes: arrayUnion(me.uid)});
 };
 
 window.searchUsers = async function(val) {
-  const results = document.getElementById('search-results');
-  if (!val.trim()) { results.classList.remove('show'); return; }
-  const q = query(collection(db, 'users'), where('username', '>=', val.toLowerCase()), where('username', '<=', val.toLowerCase() + '\uf8ff'));
+  const dd = document.getElementById('search-dropdown');
+  if (!val.trim()) { dd.classList.remove('show'); return; }
+  const q = query(collection(db,'users'), where('username','>=',val.toLowerCase()), where('username','<=',val.toLowerCase()+'\uf8ff'), limit(6));
   const snap = await getDocs(q);
-  results.innerHTML = '';
-  if (snap.empty) { results.classList.remove('show'); return; }
+  dd.innerHTML = '';
   snap.forEach(d => {
     const u = d.data();
-    const initials = (u.name || 'U')[0].toUpperCase();
-    const item = document.createElement('div');
-    item.className = 's-result';
-    item.innerHTML = `<div class="sr-av">${initials}</div><div><div class="sr-name">${esc(u.name)}</div><div class="sr-handle">@${esc(u.username)}</div></div>`;
-    results.appendChild(item);
+    const div = document.createElement('div');
+    div.className = 'sd-item';
+    div.innerHTML = `<div class="ru-av" style="width:30px;height:30px;font-size:11px">${(u.name||'U')[0].toUpperCase()}</div><div style="font-size:13px;color:#E8E9EC">${esc(u.name)}<div style="font-size:12px;color:#8B8FA8">@${esc(u.username)}</div></div>`;
+    div.onclick = () => window.location.href = '/messages.html?uid='+d.id;
+    dd.appendChild(div);
   });
-  results.classList.add('show');
+  dd.classList.toggle('show', !snap.empty);
 };
+window.hideSearch = () => document.getElementById('search-dropdown').classList.remove('show');
+window.updateCount = () => document.getElementById('char-count').textContent = 280 - document.getElementById('post-text').value.length;
 
-window.hideSearch = function() {
-  document.getElementById('search-results').classList.remove('show');
-};
-
-window.updateCount = function() {
-  const len = document.getElementById('post-text').value.length;
-  document.getElementById('char-count').textContent = 280 - len;
-};
-
-function timeAgo(date) {
-  const diff = Math.floor((Date.now() - date) / 1000);
-  if (diff < 60) return 'только что';
-  if (diff < 3600) return Math.floor(diff/60) + ' мин';
-  if (diff < 86400) return Math.floor(diff/3600) + ' ч';
-  return Math.floor(diff/86400) + ' д';
+function timeAgo(d) {
+  const s = Math.floor((Date.now()-d)/1000);
+  if (s<60) return 'только что';
+  if (s<3600) return Math.floor(s/60)+' мин';
+  if (s<86400) return Math.floor(s/3600)+' ч';
+  return Math.floor(s/86400)+' д';
 }
-
-function esc(str) {
-  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 </script>
 </body>
 </html>
