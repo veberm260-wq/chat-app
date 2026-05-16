@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Costax — Профиль</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#6C63FF">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #0F1117; color: #E8E9EC; height: 100vh; display: flex; overflow: hidden; }
@@ -28,29 +30,31 @@ body { font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #0F
 .topbar { padding: 13px 20px; border-bottom: 0.5px solid #1E2030; background: #0F1117; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
 .back-btn { background: none; border: none; color: #6C63FF; cursor: pointer; font-size: 20px; padding: 0; display: flex; align-items: center; }
 .topbar-title { font-size: 15px; font-weight: 600; color: #E8E9EC; }
-
 .content { flex: 1; overflow-y: auto; max-width: 640px; width: 100%; }
 
-/* Profile header */
 .profile-header { padding: 24px 20px; border-bottom: 0.5px solid #1E2030; }
 .profile-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
 .profile-av { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #6C63FF, #4A90E2); display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; color: white; flex-shrink: 0; overflow: hidden; }
 .profile-av img { width: 100%; height: 100%; object-fit: cover; }
-.btn-msg { background: linear-gradient(135deg, #6C63FF, #4A90E2); color: white; border: none; border-radius: 20px; padding: 8px 20px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
-.btn-msg:hover { opacity: 0.85; }
+.btn-actions { display: flex; gap: 8px; }
+.btn-follow { background: linear-gradient(135deg, #6C63FF, #4A90E2); color: white; border: none; border-radius: 20px; padding: 8px 20px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
+.btn-follow:hover { opacity: 0.85; }
+.btn-follow.following { background: transparent; border: 0.5px solid #2A2D40; color: #8B8FA8; }
+.btn-follow.following:hover { border-color: #E25B5B; color: #E25B5B; }
+.btn-msg { background: transparent; color: #E8E9EC; border: 0.5px solid #2A2D40; border-radius: 20px; padding: 8px 16px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s; display: flex; align-items: center; gap: 4px; }
+.btn-msg:hover { border-color: #6C63FF; color: #6C63FF; }
 .btn-edit { background: transparent; color: #E8E9EC; border: 0.5px solid #2A2D40; border-radius: 20px; padding: 8px 20px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s; }
 .btn-edit:hover { border-color: #6C63FF; color: #6C63FF; }
 .profile-name { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
 .profile-name h1 { font-size: 20px; font-weight: 700; color: #E8E9EC; }
 .verified { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; background: #4A90E2; border-radius: 50%; flex-shrink: 0; }
 .verified svg { width: 10px; height: 10px; }
-.profile-handle { font-size: 14px; color: #8B8FA8; margin-bottom: 10px; }
-.profile-bio { font-size: 14px; color: #C8CAD8; line-height: 1.6; margin-bottom: 12px; }
+.profile-handle { font-size: 14px; color: #8B8FA8; margin-bottom: 12px; }
 .profile-stats { display: flex; gap: 20px; }
-.stat { font-size: 13px; color: #8B8FA8; }
-.stat b { color: #E8E9EC; font-weight: 600; }
+.stat { font-size: 13px; color: #8B8FA8; cursor: pointer; }
+.stat:hover b { color: #6C63FF; }
+.stat b { color: #E8E9EC; font-weight: 600; transition: color 0.15s; }
 
-/* Posts */
 .posts-label { padding: 14px 20px; border-bottom: 0.5px solid #1E2030; font-size: 13px; font-weight: 600; color: #E8E9EC; }
 .post { padding: 16px 20px; border-bottom: 0.5px solid #1E2030; transition: background 0.1s; }
 .post:hover { background: #13151F; }
@@ -62,9 +66,7 @@ body { font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #0F
 .p-action i { font-size: 15px; }
 .p-time { font-size: 12px; color: #4A4D60; margin-bottom: 6px; }
 .empty { padding: 40px 20px; text-align: center; color: #4A4D60; font-size: 14px; }
-.loading { padding: 40px 20px; text-align: center; color: #4A4D60; font-size: 14px; }
 
-/* Mobile */
 .mob-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #0F1117; border-top: 0.5px solid #1E2030; z-index: 100; padding: 8px 0 max(8px, env(safe-area-inset-bottom)); }
 .mob-nav-inner { display: flex; justify-content: space-around; }
 .mob-item { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 16px; color: #4A4D60; text-decoration: none; font-size: 10px; }
@@ -108,13 +110,10 @@ body { font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #0F
     <button class="back-btn" onclick="history.back()"><i class="ti ti-arrow-left"></i></button>
     <div class="topbar-title" id="topbar-name">Профиль</div>
   </div>
-
   <div class="content">
-    <div class="profile-header" id="profile-header">
-      <div class="loading">Загрузка...</div>
-    </div>
+    <div class="profile-header" id="profile-header"><div class="empty">Загрузка...</div></div>
     <div class="posts-label" id="posts-label" style="display:none">Посты</div>
-    <div id="posts-list"><div class="loading">Загрузка постов...</div></div>
+    <div id="posts-list"></div>
   </div>
 </div>
 
@@ -146,10 +145,7 @@ const db = getFirestore(app);
 
 let me = null;
 const checkSvg = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
-
-// uid из URL — если нет, показываем свой профиль
-const params = new URLSearchParams(window.location.search);
-const targetUid = params.get('uid');
+const targetUid = new URLSearchParams(window.location.search).get('uid');
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) { window.location.href = '/login'; return; }
@@ -166,30 +162,36 @@ onAuthStateChanged(auth, async (user) => {
   const isMe = uid === user.uid;
 
   const pd = await getDoc(doc(db, 'users', uid));
-  if (!pd.exists()) {
-    document.getElementById('profile-header').innerHTML = '<div class="empty">Пользователь не найден</div>';
-    return;
-  }
+  if (!pd.exists()) { document.getElementById('profile-header').innerHTML = '<div class="empty">Пользователь не найден</div>'; return; }
 
   const p = pd.data();
   document.getElementById('topbar-name').textContent = p.name || 'Профиль';
 
-  const avatarHtml = p.photoURL
-    ? `<img src="${p.photoURL}">`
-    : (p.name||'U')[0].toUpperCase();
-
-  const actionBtn = isMe
-    ? `<button class="btn-edit" onclick="window.location.href='/profile.html'"><i class="ti ti-edit" style="font-size:14px;margin-right:4px"></i>Редактировать</button>`
-    : `<button class="btn-msg" onclick="window.location.href='/messages.html?uid=${uid}'"><i class="ti ti-message" style="font-size:14px;margin-right:4px"></i>Написать</button>`;
-
-  // Считаем посты
+  const avatarHtml = p.photoURL ? `<img src="${p.photoURL}">` : (p.name||'U')[0].toUpperCase();
   const postsSnap = await getDocs(query(collection(db,'posts'), where('authorId','==',uid)));
   const postCount = postsSnap.size;
+
+  const followers = p.followers || [];
+  const following = p.following || [];
+  const isFollowing = followers.includes(me.uid);
+
+  let actionBtns = '';
+  if (isMe) {
+    actionBtns = `<button class="btn-edit" onclick="window.location.href='/profile.html'"><i class="ti ti-edit" style="font-size:14px;margin-right:4px"></i>Редактировать</button>`;
+  } else {
+    actionBtns = `
+      <button class="btn-follow ${isFollowing ? 'following' : ''}" id="btn-follow" onclick="toggleFollow('${uid}', ${isFollowing})">
+        ${isFollowing ? 'Отписаться' : 'Подписаться'}
+      </button>
+      <button class="btn-msg" onclick="window.location.href='/messages.html?uid=${uid}'">
+        <i class="ti ti-message" style="font-size:14px"></i>
+      </button>`;
+  }
 
   document.getElementById('profile-header').innerHTML = `
     <div class="profile-top">
       <div class="profile-av">${avatarHtml}</div>
-      ${actionBtn}
+      <div class="btn-actions">${actionBtns}</div>
     </div>
     <div class="profile-name">
       <h1>${esc(p.name||'Пользователь')}</h1>
@@ -198,12 +200,30 @@ onAuthStateChanged(auth, async (user) => {
     <div class="profile-handle">@${esc(p.username||'user')}</div>
     <div class="profile-stats">
       <div class="stat"><b>${postCount}</b> постов</div>
-    </div>
-  `;
+      <div class="stat"><b>${followers.length}</b> подписчиков</div>
+      <div class="stat"><b>${following.length}</b> подписок</div>
+    </div>`;
 
   document.getElementById('posts-label').style.display = 'block';
   loadUserPosts(uid);
 });
+
+window.toggleFollow = async function(uid, isFollowing) {
+  const btn = document.getElementById('btn-follow');
+  if (isFollowing) {
+    await updateDoc(doc(db,'users',uid), { followers: arrayRemove(me.uid) });
+    await updateDoc(doc(db,'users',me.uid), { following: arrayRemove(uid) });
+    btn.textContent = 'Подписаться';
+    btn.classList.remove('following');
+    btn.setAttribute('onclick', `toggleFollow('${uid}', false)`);
+  } else {
+    await updateDoc(doc(db,'users',uid), { followers: arrayUnion(me.uid) });
+    await updateDoc(doc(db,'users',me.uid), { following: arrayUnion(uid) });
+    btn.textContent = 'Отписаться';
+    btn.classList.add('following');
+    btn.setAttribute('onclick', `toggleFollow('${uid}', true)`);
+  }
+};
 
 async function loadUserPosts(uid) {
   const q = query(collection(db,'posts'), where('authorId','==',uid), orderBy('createdAt','desc'));
@@ -237,7 +257,6 @@ window.toggleLike = async function(id, liked) {
   if (liked) await updateDoc(ref, {likes: arrayRemove(me.uid)});
   else await updateDoc(ref, {likes: arrayUnion(me.uid)});
   const pd = await getDoc(ref);
-  // Обновить кнопку
   const btn = document.querySelector(`[onclick="toggleLike('${id}',${liked})"]`);
   if (btn && pd.exists()) {
     const newLiked = pd.data().likes?.includes(me.uid);
@@ -256,6 +275,10 @@ function timeAgo(d) {
   return Math.floor(s/86400)+' д назад';
 }
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+
+<script>
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
 </script>
 </body>
 </html>
