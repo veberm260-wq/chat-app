@@ -33,7 +33,9 @@ function saveMessages() {
 
 // Статика
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
 // Онлайн пользователи: socketId → name
 const onlineUsers = new Map();
 
