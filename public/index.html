@@ -219,9 +219,9 @@ function renderPost(id, data) {
   div.className = 'post';
   div.innerHTML = `
     <div class="post-inner">
-      <div class="p-av" onclick="msgUser('${data.authorId}')">${init}</div>
+      <div class="p-av" onclick="viewUser('${data.authorId}')">${init}</div>
       <div class="p-body">
-        <div class="p-name-row" onclick="msgUser('${data.authorId}')">
+        <div class="p-name-row" onclick="viewUser('${data.authorId}')">
           <span class="p-name">${esc(data.authorName||'Аноним')}</span>
           ${badge}
           <span class="p-handle">@${esc(data.authorUsername||'user')}</span>
