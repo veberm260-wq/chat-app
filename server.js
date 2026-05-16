@@ -18,7 +18,9 @@ app.get('/profile', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'profile.html'));
 });
 
-app.get('/profile.html', (req, res) => {
+app.get('/messages', (req, res) => res.sendFile(path.join(__dirname, 'public', 'messages.html')));
+
+app.get('/messages.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'profile.html'));
 });
 
