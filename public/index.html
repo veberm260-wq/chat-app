@@ -8,6 +8,13 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #F5F0E8; height: 100vh; display: flex; overflow: hidden; }
 
+/* Mobile bottom nav */
+.mob-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #2D3A1E; border-top: 0.5px solid rgba(200,168,75,0.2); z-index: 100; padding: 8px 0 max(8px, env(safe-area-inset-bottom)); }
+.mob-nav-inner { display: flex; justify-content: space-around; }
+.mob-item { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 16px; color: #6B7A52; text-decoration: none; font-size: 10px; cursor: pointer; }
+.mob-item.active { color: #C8A84B; }
+.mob-item i { font-size: 22px; }
+
 /* Sidebar */
 .sidebar { width: 200px; min-width: 200px; background: #2D3A1E; display: flex; flex-direction: column; padding: 20px 14px; gap: 4px; height: 100vh; }
 .s-logo { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #C8A84B; margin-bottom: 24px; padding: 0 8px; }
@@ -121,6 +128,30 @@ body { font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #F5
     <div id="posts-list"><div class="loading">Загрузка...</div></div>
   </div>
 </div>
+
+
+<!-- Мобильная навигация снизу -->
+<nav class="mob-nav">
+  <div class="mob-nav-inner">
+    <a class="mob-item active" href="/"><i class="ti ti-home"></i>Лента</a>
+    <a class="mob-item" href="#"><i class="ti ti-search"></i>Поиск</a>
+    <a class="mob-item" href="/profile.html"><i class="ti ti-user"></i>Профиль</a>
+  </div>
+</nav>
+
+<style>
+@media (max-width: 640px) {
+  body { overflow: auto; flex-direction: column; height: auto; min-height: 100vh; }
+  .sidebar { display: none; }
+  .mob-nav { display: block; }
+  .main { height: 100vh; padding-bottom: 70px; }
+  .feed { max-width: 100%; padding: 12px; }
+  .topbar { padding: 12px 14px; }
+  .search-inp { width: 130px; }
+  .compose { border-radius: 10px; }
+  .post { border-radius: 10px; }
+}
+</style>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
