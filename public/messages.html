@@ -189,11 +189,13 @@
     </div>
   </div>
 
-  <!-- Firebase + Логика -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, doc, getDoc, setDoc, getDocs, serverTimestamp, where, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { 
+      getFirestore, collection, addDoc, onSnapshot, orderBy, query, 
+      doc, getDoc, setDoc, getDocs, serverTimestamp, where, limit 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSy...lR9k",
@@ -216,11 +218,13 @@
         return;
       }
       me = user;
+
       const pd = await getDoc(doc(db, 'users', user.uid));
       if (!pd.exists()) {
         window.location.href = '/profile.html?setup=1';
         return;
       }
+
       myProfile = pd.data();
       loadChats();
 
@@ -228,23 +232,159 @@
       if (uid) openChatWithUser(uid);
     });
 
-    function getChatId(a, b) { return [a, b].sort().join('_'); }
+    function getChatId(a, b) {
+      return [a, b].sort().join('_');
+    }
 
-    function loadChats() { /* ... (твоя оригинальная функция) */ }
+    function loadChats() {
+      const q = query(collection(db, 'chats'), where('members', 'array-contains', me.uid));
+      onSnapshot(q, async (snap) => {
+        const list = document.getElementById('chats-list');
+        if (snap.empty) {
+          list.innerHTML = '<div style="padding:20px;color:#666;">Нет сообщений.<br>Нажми «+ Новый» чтобы написать.</div>';
+          return;
+        }
+        list.innerHTML = '';
+        const items = [];
+        for (const d of snap.docs) {
+          const chat = { id: d.id, ...d.data() };
+          items.push({ chat, el: await renderChatItem(chat) });
+        }
+        items.sort((a, b) => (b.chat.lastAt?.seconds || 0) - (a.chat.lastAt?.seconds || 0));
+        items.forEach(i => list.appendChild(i.el));
+      });
+    }
 
-    async function renderChatItem(chat) { /* ... */ }
+    async function renderChatItem(chat) {
+      const otherId = chat.members.find(id => id !== me.uid);
+      const od = await getDoc(doc(db, 'users', otherId));
+      const other = od.exists() ? od.data() : { name: 'Пользователь', username: 'user' };
 
-    window.openChat = function(chatId, other) { /* ... */ }
+      const div = document.createElement('div');
+      div.className = 'chat-item' + (chat.id === activeChatId ? ' active' : '');
+      div.dataset.chatId = chat.id;
 
-    window.openChatWithUser = async function(uid) { /* ... */ }
+      div.innerHTML = `
+        <div class="avatar">${(other.name || 'U')[0].toUpperCase()}</div>
+        <div class="info">
+          <div class="name">${esc(other.name)}</div>
+          <div class="last-msg">${esc(chat.lastMsg || 'Начни переписку')}</div>
+        </div>
+      `;
+      div.onclick = () => openChat(chat.id, other);
+      return div;
+    }
 
-    window.sendMsg = async function() { /* ... */ }
+    window.openChat = function(chatId, other) {
+      activeChatId = chatId;
+      document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
+      document.querySelector(`[data-chat-id="${chatId}"]`)?.classList.add('active');
 
-    window.showNewChat = function() { /* ... */ }
+      document.getElementById('chat-av').textContent = (other.name || 'U')[0].toUpperCase();
+      document.getElementById('chat-name').textContent = other.name || 'Пользователь';
+      document.getElementById('chat-handle').textContent = '@' + (other.username || 'user');
 
-    function timeAgo(date) { /* ... */ }
+      document.getElementById('empty-state').style.display = 'none';
+      document.getElementById('chat-header').style.display = 'flex';
+      document.getElementById('chat-messages').style.display = 'flex';
+      document.getElementById('input-area').style.display = 'flex';
 
-    function esc(str) { return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+      if (msgUnsub) msgUnsub();
+
+      const q = query(collection(db, 'chats', chatId, 'messages'), orderBy('createdAt', 'asc'));
+      msgUnsub = onSnapshot(q, (snap) => {
+        const container = document.getElementById('chat-messages');
+        container.innerHTML = '';
+        snap.forEach(d => {
+          const msg = d.data();
+          const div = document.createElement('div');
+          div.className = 'message ' + (msg.senderId === me.uid ? 'mine' : 'theirs');
+          div.innerHTML = `
+            <div>${esc(msg.text)}</div>
+            <div class="msg-time">${msg.createdAt ? timeAgo(msg.createdAt.toDate()) : ''}</div>
+          `;
+          container.appendChild(div);
+        });
+        container.scrollTop = container.scrollHeight;
+      });
+    };
+
+    window.openChatWithUser = async function(uid) {
+      const chatId = getChatId(me.uid, uid);
+      const od = await getDoc(doc(db, 'users', uid));
+      if (!od.exists()) return;
+
+      const other = od.data();
+      const chatRef = doc(db, 'chats', chatId);
+      const cd = await getDoc(chatRef);
+      if (!cd.exists()) {
+        await setDoc(chatRef, { members: [me.uid, uid], lastMsg: '', lastAt: serverTimestamp() });
+      }
+      openChat(chatId, other);
+    };
+
+    window.sendMsg = async function() {
+      const input = document.getElementById('msg-input');
+      const text = input.value.trim();
+      if (!text || !activeChatId) return;
+
+      input.value = '';
+      await addDoc(collection(db, 'chats', activeChatId, 'messages'), {
+        text,
+        senderId: me.uid,
+        senderName: myProfile.name,
+        createdAt: serverTimestamp()
+      });
+      await setDoc(doc(db, 'chats', activeChatId), { lastMsg: text, lastAt: serverTimestamp() }, { merge: true });
+    };
+
+    window.showNewChat = function() {
+      const modal = document.createElement('div');
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:1000';
+      modal.innerHTML = `
+        <div style="background:#1a1a1a;padding:24px;border-radius:16px;width:340px;">
+          <h3 style="margin-bottom:16px;">Новый чат</h3>
+          <input type="text" id="search-input" placeholder="Поиск пользователя" style="width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#111;color:white;margin-bottom:12px;">
+          <div id="search-results"></div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      const input = modal.querySelector('#search-input');
+      const results = modal.querySelector('#search-results');
+
+      input.oninput = async () => {
+        const val = input.value.trim();
+        if (!val) { results.innerHTML = ''; return; }
+        const q = query(collection(db, 'users'), where('username', '>=', val.toLowerCase()), where('username', '<=', val.toLowerCase() + ''), limit(8));
+        const snap = await getDocs(q);
+        results.innerHTML = '';
+        snap.forEach(d => {
+          if (d.id === me.uid) return;
+          const u = d.data();
+          const div = document.createElement('div');
+          div.style.cssText = 'padding:10px;cursor:pointer;border-radius:8px;';
+          div.innerHTML = `<strong>${esc(u.name)}</strong> <span style="color:#888">@${esc(u.username)}</span>`;
+          div.onclick = () => {
+            modal.remove();
+            openChatWithUser(d.id);
+          };
+          results.appendChild(div);
+        });
+      };
+    };
+
+    function timeAgo(date) {
+      const seconds = Math.floor((Date.now() - date) / 1000);
+      if (seconds < 60) return 'только что';
+      if (seconds < 3600) return Math.floor(seconds / 60) + ' мин';
+      if (seconds < 86400) return Math.floor(seconds / 3600) + ' ч';
+      return Math.floor(seconds / 86400) + ' д';
+    }
+
+    function esc(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
   </script>
 </body>
 </html>
