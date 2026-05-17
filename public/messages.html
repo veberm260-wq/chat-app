@@ -354,16 +354,37 @@ auth.onAuthStateChanged(async (user) => {
 let chatsUnsubscribe = null;
 
 function loadChats() {
-  if (chatsUnsubscribe) chatsUnsubscribe();
-  const q = db.collection('chats').where('members', 'array-contains', me.uid);
+  if (chatsUnsubscribe) {
+    chatsUnsubscribe();
+    chatsUnsubscribe = null;
+  }
+
+  const q = db.collection('chats')
+    .where('members', 'array-contains', me.uid)
+    .orderBy('lastAt', 'desc');
+
   chatsUnsubscribe = q.onSnapshot(async (snap) => {
     const list = document.getElementById('chats-list');
     list.innerHTML = '';
+
     if (snap.empty) {
       list.innerHTML = `<div class="empty-chats">Нет сообщений.<br>Нажми «+ Новый» чтобы написать.</div>`;
       return;
     }
-    const chatElements = await Promise.all(snap.docs.map(doc => renderChatItem({ id: doc.id, ...doc.data() })));
+
+    // Защита от дублей чатов
+    const seen = new Set();
+    const chatElements = [];
+
+    for (const doc of snap.docs) {
+      if (seen.has(doc.id)) continue;
+      seen.add(doc.id);
+
+      const chatData = { id: doc.id, ...doc.data() };
+      const el = await renderChatItem(chatData);
+      chatElements.push(el);
+    }
+
     chatElements.forEach(el => list.appendChild(el));
   }, (error) => {
     console.error('Chats error:', error);
