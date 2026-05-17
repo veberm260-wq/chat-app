@@ -341,7 +341,7 @@ onAuthStateChanged(auth, async (user) => {
   if (!user) { window.location.href = '/login'; return; }
   me = user;
   const pd = await getDoc(doc(db, 'users', user.uid));
-  if (!pd.exists()) { window.location.href = '/profile.html?setup=1'; return; }
+  if (!pd.exists()) { showEditForm(); return; }
   myProfile = pd.data();
   renderProfile(myProfile, user);
   loadPosts();
@@ -406,6 +406,12 @@ window.previewPhoto = function(inp) {
     r.onload = e => { document.getElementById('profile-av').innerHTML = `<img src="${e.target.result}">`; };
     r.readAsDataURL(inp.files[0]);
   }
+};
+
+window.showEditForm = function() {
+  document.getElementById('profile-name').textContent = 'Новый пользователь';
+  document.getElementById('profile-handle').textContent = '@...';
+  document.getElementById('edit-form').classList.add('show');
 };
 
 window.saveProfile = async function() {
