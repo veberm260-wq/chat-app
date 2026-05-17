@@ -255,8 +255,7 @@ body.dark .mob-item { color: #71767B; }
           <span class="prefix">@</span>
           <input type="text" id="inp-username" class="field" placeholder="ivan" maxlength="20" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')">
         </div>
-        <div class="field-label">Email</div>
-        <input type="email" id="inp-email" class="field readonly" readonly>
+        
         <div class="btn-row">
           <button class="btn-save" id="btn-save" onclick="saveProfile()">Сохранить</button>
           <button class="btn-edit" onclick="toggleEdit()">Отмена</button>
@@ -357,7 +356,7 @@ function renderProfile(p, user) {
   document.getElementById('profile-handle').textContent = '@'+(p.username||'');
   document.getElementById('inp-name').value = p.name||'';
   document.getElementById('inp-username').value = p.username||'';
-  document.getElementById('inp-email').value = user.email||'';
+  // email stored in Firebase Auth
   const followers = p.followers?.length || 0;
   const following = p.following?.length || 0;
   document.getElementById('stat-followers').innerHTML = `<b>${followers}</b> подписчиков`;
