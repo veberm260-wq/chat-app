@@ -318,6 +318,9 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+// Устанавливаем persistence явно (LOCAL = сохраняется между перезагрузками)
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.error);
+
 let me = null;
 let myProfile = null;
 let activeChatId = null;
@@ -339,15 +342,32 @@ function fmtTime(ts) {
   return new Date(ts.toDate()).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
 }
 
+// Исправленная авторизация — не редиректим сразу при первом null
 auth.onAuthStateChanged(async (user) => {
-  if (!user) return window.location.href = '/login';
+  if (!user) {
+    // Даём Firebase время восстановить сессию
+    setTimeout(() => {
+      if (!auth.currentUser) {
+        window.location.href = '/login';
+      }
+    }, 1200);
+    return;
+  }
+
   me = user;
+
   const pd = await db.collection('users').doc(user.uid).get();
-  if (!pd.exists) return window.location.href = '/profile.html?setup=1';
+  if (!pd.exists) {
+    window.location.href = '/profile.html?setup=1';
+    return;
+  }
+
   myProfile = pd.data();
+
   document.getElementById('sidebar-av').textContent = (myProfile.name || 'U')[0].toUpperCase();
   document.getElementById('sidebar-name').textContent = myProfile.name || '';
   document.getElementById('sidebar-handle').textContent = '@' + (myProfile.username || '');
+
   loadChats();
 });
 
@@ -371,7 +391,6 @@ function loadChats() {
       return;
     }
 
-    // Используем Map<chatId, element> — надёжная защита от дублей
     const chatMap = new Map();
 
     for (const doc of snap.docs) {
@@ -380,8 +399,6 @@ function loadChats() {
       chatMap.set(doc.id, el);
     }
 
-    // Полностью перестраиваем список из Map.
-    // Это гарантирует отсутствие дублей даже при двойном срабатывании onSnapshot.
     list.innerHTML = '';
     chatMap.forEach(el => list.appendChild(el));
   }, (error) => {
