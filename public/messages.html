@@ -8,6 +8,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+<!-- Firebase CDN (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
 <style>
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -343,18 +349,18 @@ const firebaseConfig = {
   appId: "1:747179946604:web:073d7faf7d80fb40041e49"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-onAuthStateChanged(auth, async (user) => {
+auth.onAuthStateChanged(async (user) => {
   console.log("🔥 Auth state:", user ? user.uid : "null");
 
   if (!user) return window.location.href = '/login';
 
   me = user;
-  const pd = await getDoc(doc(db, 'users', user.uid));
-  if (!pd.exists()) return window.location.href = '/profile.html?setup=1';
+  const pd = await db.collection('users').doc(user.uid).get();
+  if (!pd.exists) return window.location.href = '/profile.html?setup=1';
 
   myProfile = pd.data();
   console.log("✅ Profile loaded:", myProfile.name);
@@ -382,8 +388,8 @@ function getChatId(a, b) { return [a,b].sort().join('_'); }
 
 function loadChats() {
   console.log("📋 Loading chats...");
-  const q = query(collection(db, 'chats'), where('members', 'array-contains', me.uid));
-  onSnapshot(q, async (snap) => {
+  const q = db.collection('chats').where('members', 'array-contains', me.uid);
+  q.onSnapshot(async (snap) => {
     const list = document.getElementById('chats-list');
     list.innerHTML = '';
     if (snap.empty) {
@@ -400,8 +406,8 @@ function loadChats() {
 
 async function renderChatItem(chat) {
   const otherId = chat.members.find(id => id !== me.uid);
-  const od = await getDoc(doc(db, 'users', otherId));
-  const other = od.exists() ? od.data() : { name: 'Пользователь' };
+  const od = await db.collection('users').doc(otherId).get();
+  const other = od.exists ? od.data() : { name: 'Пользователь' };
 
   const div = document.createElement('div');
   div.className = 'chat-item';
