@@ -475,7 +475,7 @@ window.openChatWithUser = async function(targetUid) {
   if (!chatSnap.exists) {
     await chatRef.set({
       members: [me.uid, targetUid],
-      lastMsg: ',
+      lastMsg: '',
       lastAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     console.log("✅ Новый чат создан:", chatId);
