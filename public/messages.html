@@ -326,15 +326,104 @@ if (localStorage.getItem('theme') === 'dark') toggleTheme();
 </script>
 
 <script>
-console.log("=== SIMPLE TEST SCRIPT STARTED ===");
+console.log("=== CHAT SCRIPT LOADED ===");
 
-document.getElementById('sidebar-name').textContent = "TEST OK";
+let me = null;
+let myProfile = null;
+let activeChatId = null;
+let msgUnsub = null;
 
-setTimeout(() => {
-  console.log("=== SCRIPT STILL ALIVE AFTER 1 SECOND ===");
-}, 1000);
+// === Firebase ===
+const firebaseConfig = {
+  apiKey: "AIzaSyCeveXncaJYszckdflfTVWCDc0AwNilR9k",
+  authDomain: "costax-aed53.firebaseapp.com",
+  projectId: "costax-aed53",
+  storageBucket: "costax-aed53.firebasestorage.app",
+  messagingSenderId: "747179946604",
+  appId: "1:747179946604:web:073d7faf7d80fb40041e49"
+};
 
-console.log("=== SIMPLE TEST SCRIPT LOADED ===");
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+onAuthStateChanged(auth, async (user) => {
+  console.log("🔥 Auth state:", user ? user.uid : "null");
+
+  if (!user) return window.location.href = '/login';
+
+  me = user;
+  const pd = await getDoc(doc(db, 'users', user.uid));
+  if (!pd.exists()) return window.location.href = '/profile.html?setup=1';
+
+  myProfile = pd.data();
+  console.log("✅ Profile loaded:", myProfile.name);
+
+  document.getElementById('sidebar-av').textContent = (myProfile.name || 'U')[0].toUpperCase();
+  document.getElementById('sidebar-name').textContent = myProfile.name || '';
+  document.getElementById('sidebar-handle').textContent = '@' + (myProfile.username || '');
+
+  loadChats();
+});
+
+// === Функции ===
+function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function timeAgo(d) {
+  if (!d) return '';
+  const s = Math.floor((Date.now() - d) / 1000);
+  if (s < 60) return 'только что';
+  if (s < 3600) return Math.floor(s/60)+' мин';
+  if (s < 86400) return Math.floor(s/3600)+' ч';
+  return Math.floor(s/86400)+' д';
+}
+
+function getChatId(a, b) { return [a,b].sort().join('_'); }
+
+function loadChats() {
+  console.log("📋 Loading chats...");
+  const q = query(collection(db, 'chats'), where('members', 'array-contains', me.uid));
+  onSnapshot(q, async (snap) => {
+    const list = document.getElementById('chats-list');
+    list.innerHTML = '';
+    if (snap.empty) {
+      list.innerHTML = `<div class="empty-chats">Нет сообщений.<br>Нажми «+ Новый»</div>`;
+      return;
+    }
+    for (const d of snap.docs) {
+      const chat = { id: d.id, ...d.data() };
+      const el = await renderChatItem(chat);
+      list.appendChild(el);
+    }
+  });
+}
+
+async function renderChatItem(chat) {
+  const otherId = chat.members.find(id => id !== me.uid);
+  const od = await getDoc(doc(db, 'users', otherId));
+  const other = od.exists() ? od.data() : { name: 'Пользователь' };
+
+  const div = document.createElement('div');
+  div.className = 'chat-item';
+  div.dataset.chatId = chat.id;
+  div.innerHTML = `
+    <div class="ci-av">${(other.name||'U')[0].toUpperCase()}</div>
+    <div class="ci-info">
+      <div class="ci-name">${esc(other.name)}</div>
+      <div class="ci-last">${esc(chat.lastMsg || 'Начни переписку')}</div>
+    </div>
+    <div class="ci-time">${chat.lastAt ? timeAgo(chat.lastAt.toDate()) : ''}</div>
+  `;
+  div.onclick = () => openChat(chat.id, other);
+  return div;
+}
+
+window.openChat = function(chatId, other) {
+  console.log("Открыт чат:", chatId);
+  activeChatId = chatId;
+};
+
+console.log("=== FULL CHAT SCRIPT READY ===");
 </script>
 
 </body>
