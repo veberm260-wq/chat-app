@@ -332,7 +332,7 @@ if (localStorage.getItem('theme') === 'dark') toggleTheme();
 </script>
 
 <script>
-console.log("=== CHAT SCRIPT LOADED (CDN) ===");
+console.log("=== FULL CHAT v2 LOADED ===");
 
 const firebaseConfig = {
   apiKey: "AIzaSyCeveXncaJYszckdflfTVWCDc0AwNilR9k",
@@ -344,7 +344,6 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-
 const auth = firebase.auth();
 const db = firebase.firestore();
 
@@ -353,44 +352,142 @@ let myProfile = null;
 let activeChatId = null;
 
 auth.onAuthStateChanged(async (user) => {
-  console.log("🔥 Auth state:", user ? user.uid : "null");
-
   if (!user) return window.location.href = '/login';
-
   me = user;
-  try {
-    const pd = await db.collection('users').doc(user.uid).get();
-    if (!pd.exists) return window.location.href = '/profile.html?setup=1';
 
-    myProfile = pd.data();
-    console.log("✅ Profile loaded:", myProfile.name);
+  const pd = await db.collection('users').doc(user.uid).get();
+  if (!pd.exists) return window.location.href = '/profile.html?setup=1';
 
-    document.getElementById('sidebar-av').textContent = (myProfile.name || 'U')[0].toUpperCase();
-    document.getElementById('sidebar-name').textContent = myProfile.name || '';
-    document.getElementById('sidebar-handle').textContent = '@' + (myProfile.username || '');
+  myProfile = pd.data();
+  console.log("✅ Profile loaded:", myProfile.name);
 
-    loadChats();
-  } catch (e) {
-    console.error("❌ Auth error:", e);
-  }
+  document.getElementById('sidebar-av').textContent = (myProfile.name || 'U')[0].toUpperCase();
+  document.getElementById('sidebar-name').textContent = myProfile.name || '';
+  document.getElementById('sidebar-handle').textContent = '@' + (myProfile.username || '');
+
+  loadChats();
 });
 
 function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function timeAgo(d) {
   if (!d) return '';
-  const s = Math.floor((Date.now() - d) / 1000);
+  const s = Math.floor((Date.now() - d)/1000);
   if (s < 60) return 'только что';
   if (s < 3600) return Math.floor(s/60)+' мин';
   if (s < 86400) return Math.floor(s/3600)+' ч';
   return Math.floor(s/86400)+' д';
 }
 
+let chatsUnsubscribe = null;
+
 function loadChats() {
-  console.log("📋 Loading chats...");
+  console.log("📋 Starting loadChats for user:", me?.uid);
+
+  if (chatsUnsubscribe) {
+    chatsUnsubscribe();
+    console.log("🔄 Unsubscribed from previous chats listener");
+  }
+
+  const q = db.collection('chats').where('members', 'array-contains', me.uid);
+
+  chatsUnsubscribe = q.onSnapshot(
+    async (snap) => {
+      console.log("📡 Snapshot received. Empty?", snap.empty, "Size:", snap.size);
+
+      const list = document.getElementById('chats-list');
+      list.innerHTML = '';
+
+      if (snap.empty) {
+        list.innerHTML = `<div class="empty-chats">Нет сообщений.<br>Нажми «+ Новый» чтобы написать.</div>`;
+        return;
+      }
+
+      console.log(`📬 Found ${snap.size} chats`);
+
+      const chatElements = await Promise.all(
+        snap.docs.map(async (doc) => {
+          const chat = { id: doc.id, ...doc.data() };
+          return await renderChatItem(chat);
+        })
+      );
+
+      chatElements.forEach(el => list.appendChild(el));
+      console.log("✅ Chats rendered");
+    },
+    (error) => {
+      console.error("❌ Chats snapshot error:", error.code, error.message);
+      console.error("Full error:", error);
+    }
+  );
 }
 
-console.log("=== FULL CHAT SCRIPT READY (CDN) ===");
+async function renderChatItem(chat) {
+  const otherId = chat.members.find(id => id !== me.uid);
+  const od = await db.collection('users').doc(otherId).get();
+  const other = od.exists ? od.data() : {name: 'Пользователь'};
+
+  const div = document.createElement('div');
+  div.className = 'chat-item';
+  div.dataset.chatId = chat.id;
+  div.innerHTML = `
+    <div class="ci-av">${(other.name||'U')[0].toUpperCase()}</div>
+    <div class="ci-info">
+      <div class="ci-name">${esc(other.name)}</div>
+      <div class="ci-last">${esc(chat.lastMsg || 'Начни переписку')}</div>
+    </div>
+    <div class="ci-time">${chat.lastAt ? timeAgo(chat.lastAt.toDate()) : ''}</div>
+  `;
+  div.onclick = () => openChat(chat.id, other);
+  return div;
+}
+
+window.openChat = function(chatId, other) {
+  activeChatId = chatId;
+  console.log("Открыт чат:", chatId);
+  // TODO: здесь позже добавим загрузку сообщений и правую панель
+};
+
+window.showNewChat = function() {
+  const username = prompt("Введите username пользователя, которому хотите написать:");
+  if (!username) return;
+
+  db.collection('users').where('username', '==', username.toLowerCase()).get()
+    .then(snapshot => {
+      if (snapshot.empty) {
+        alert("Пользователь с таким username не найден");
+        return;
+      }
+      const userDoc = snapshot.docs[0];
+      openChatWithUser(userDoc.id);
+    })
+    .catch(e => console.error("Search error:", e));
+};
+
+window.openChatWithUser = async function(targetUid) {
+  if (!me || targetUid === me.uid) return;
+
+  const chatId = [me.uid, targetUid].sort().join('_');
+
+  const chatRef = db.collection('chats').doc(chatId);
+  const chatSnap = await chatRef.get();
+
+  if (!chatSnap.exists) {
+    await chatRef.set({
+      members: [me.uid, targetUid],
+      lastMsg: ',
+      lastAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    console.log("✅ Новый чат создан:", chatId);
+  }
+
+  const otherSnap = await db.collection('users').doc(targetUid).get();
+  const other = otherSnap.exists ? otherSnap.data() : { name: 'Пользователь' };
+
+  openChat(chatId, other);
+};
+
+console.log("=== FULL CHAT v2 READY ===");
 </script>
 
 </body>
