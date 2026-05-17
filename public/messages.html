@@ -285,14 +285,6 @@ body.dark .back-btn:hover { background: #181818; }
   </div>
 </div>
 
-<nav class="mob-nav">
-  <div class="mob-nav-inner">
-    <a class="mob-item" href="/"><i class="ti ti-home"></i>Лента</a>
-    <a class="mob-item active" href="/messages.html"><i class="ti ti-message"></i>Чаты</a>
-    <a class="mob-item" href="/profile.html"><i class="ti ti-user"></i>Профиль</a>
-  </div>
-</nav>
-
 <script>
 function initStars() {
   const canvas = document.getElementById('stars-canvas');
@@ -335,8 +327,13 @@ if (localStorage.getItem('theme') === 'dark') toggleTheme();
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, doc, getDoc, setDoc, getDocs, serverTimestamp, where, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { 
+  getFirestore, collection, addDoc, onSnapshot, orderBy, query, 
+  doc, getDoc, setDoc, serverTimestamp, where, limit 
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+console.log("✅ Firebase imports OK");
 
 const firebaseConfig = {
   apiKey: "AIzaSyCeveXncaJYszckdflfTVWCDc0AwNilR9k",
@@ -350,141 +347,65 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-let me = null, myProfile = null, activeChatId = null, msgUnsub = null;
+
+console.log("✅ Firebase initialized");
+
+let me = null;
+let myProfile = null;
+let activeChatId = null;
+let msgUnsub = null;
+
+setPersistence(auth, browserLocalPersistence)
+  .then(() => console.log("✅ Persistence set"))
+  .catch(e => console.warn("⚠️ Persistence:", e));
 
 onAuthStateChanged(auth, async (user) => {
-  if (!user) { window.location.href = '/login'; return; }
+  console.log("🔥 onAuthStateChanged:", user ? user.uid : "null");
+
+  if (!user) {
+    console.log("➡️ No user → redirect login");
+    window.location.href = '/login';
+    return;
+  }
+
   me = user;
-  const pd = await getDoc(doc(db, 'users', user.uid));
-  if (!pd.exists()) { window.location.href = '/profile.html?setup=1'; return; }
-  myProfile = pd.data();
-  document.getElementById('sidebar-av').textContent = (myProfile.name||'U')[0].toUpperCase();
-  document.getElementById('sidebar-name').textContent = myProfile.name||'';
-  document.getElementById('sidebar-handle').textContent = '@'+(myProfile.username||'');
-  loadChats();
-  const uid = new URLSearchParams(window.location.search).get('uid');
-  if (uid) openChatWithUser(uid);
+  try {
+    console.log("📄 Loading profile for", user.uid);
+    const pd = await getDoc(doc(db, 'users', user.uid));
+    
+    if (!pd.exists()) {
+      console.log("➡️ No profile → setup");
+      window.location.href = '/profile.html?setup=1';
+      return;
+    }
+
+    myProfile = pd.data();
+    console.log("✅ Profile loaded:", myProfile.name);
+
+    document.getElementById('sidebar-av').textContent = (myProfile.name || 'U')[0].toUpperCase();
+    document.getElementById('sidebar-name').textContent = myProfile.name || '';
+    document.getElementById('sidebar-handle').textContent = '@' + (myProfile.username || '');
+
+    loadChats();
+
+  } catch (e) {
+    console.error("❌ Critical error in auth:", e);
+  }
 });
 
-function getChatId(a, b) { return [a,b].sort().join('_'); }
-
-function loadChats() {
-  const q = query(collection(db,'chats'), where('members','array-contains',me.uid));
-  onSnapshot(q, async snap => {
-    const list = document.getElementById('chats-list');
-    if (snap.empty) { list.innerHTML = '<div class="empty-chats">Нет сообщений.<br>Нажми «+ Новый» чтобы написать.</div>'; return; }
-    list.innerHTML = '';
-    const items = [];
-    for (const d of snap.docs) {
-      const chat = { id: d.id, ...d.data() };
-      items.push({ chat, el: await renderChatItem(chat) });
-    }
-    items.sort((a,b) => (b.chat.lastAt?.seconds||0) - (a.chat.lastAt?.seconds||0));
-    items.forEach(i => list.appendChild(i.el));
-  });
-}
-
-async function renderChatItem(chat) {
-  const otherId = chat.members.find(id => id !== me.uid);
-  const od = await getDoc(doc(db,'users',otherId));
-  const other = od.exists() ? od.data() : { name:'Пользователь', username:'user' };
-  const div = document.createElement('div');
-  div.className = 'chat-item' + (chat.id === activeChatId ? ' active' : '');
-  div.dataset.chatId = chat.id;
-  div.innerHTML = `
-    <div class="ci-av">${(other.name||'U')[0].toUpperCase()}</div>
-    <div class="ci-info">
-      <div class="ci-name">${esc(other.name)}</div>
-      <div class="ci-last">${esc(chat.lastMsg||'Начни переписку')}</div>
-    </div>
-    <div class="ci-time">${chat.lastAt ? timeAgo(chat.lastAt.toDate()) : ''}</div>`;
-  div.onclick = () => openChat(chat.id, other);
-  return div;
-}
-
-window.openChat = function(chatId, other) {
-  activeChatId = chatId;
-  document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
-  document.querySelector(`[data-chat-id="${chatId}"]`)?.classList.add('active');
-  document.getElementById('chat-av').textContent = (other.name||'U')[0].toUpperCase();
-  document.getElementById('chat-name').textContent = other.name||'Пользователь';
-  document.getElementById('chat-handle').textContent = '@'+(other.username||'user');
-  document.getElementById('chat-empty').style.display = 'none';
-  document.getElementById('chat-active').style.display = 'flex';
-  document.getElementById('chat-window').classList.add('open');
-  if (msgUnsub) msgUnsub();
-  const q = query(collection(db,'chats',chatId,'messages'), orderBy('createdAt','asc'));
-  msgUnsub = onSnapshot(q, snap => {
-    const c = document.getElementById('chat-messages');
-    c.innerHTML = '';
-    snap.forEach(d => {
-      const msg = d.data();
-      const div = document.createElement('div');
-      div.className = 'msg ' + (msg.senderId === me.uid ? 'mine' : 'theirs');
-      div.innerHTML = `<div class="msg-bubble">${esc(msg.text)}</div><div class="msg-time">${msg.createdAt ? timeAgo(msg.createdAt.toDate()) : ''}</div>`;
-      c.appendChild(div);
-    });
-    c.scrollTop = c.scrollHeight;
-  });
-};
-
-window.openChatWithUser = async function(uid) {
-  const chatId = getChatId(me.uid, uid);
-  const od = await getDoc(doc(db,'users',uid));
-  if (!od.exists()) return;
-  const other = od.data();
-  const chatRef = doc(db,'chats',chatId);
-  const cd = await getDoc(chatRef);
-  if (!cd.exists()) await setDoc(chatRef, { members:[me.uid,uid], lastMsg:'', lastAt:serverTimestamp() });
-  openChat(chatId, other);
-};
-
-window.sendMsg = async function() {
-  const input = document.getElementById('msg-input');
-  const text = input.value.trim();
-  if (!text || !activeChatId) return;
-  input.value = ''; input.style.height = 'auto';
-  await addDoc(collection(db,'chats',activeChatId,'messages'), { text, senderId:me.uid, senderName:myProfile.name, createdAt:serverTimestamp() });
-  await setDoc(doc(db,'chats',activeChatId), { lastMsg:text, lastAt:serverTimestamp() }, { merge:true });
-};
-
-window.showNewChat = function() {
-  document.getElementById('modal-overlay').classList.add('show');
-  setTimeout(() => document.getElementById('modal-search').focus(), 100);
-};
-window.hideNewChat = function() {
-  document.getElementById('modal-overlay').classList.remove('show');
-  document.getElementById('modal-search').value = '';
-  document.getElementById('modal-results').innerHTML = '';
-};
-window.searchForUser = async function(val) {
-  const results = document.getElementById('modal-results');
-  if (!val.trim()) { results.innerHTML = ''; return; }
-  const q = query(collection(db,'users'), where('username','>=',val.toLowerCase()), where('username','<=',val.toLowerCase()+''), limit(10));
-  const snap = await getDocs(q);
-  results.innerHTML = '';
-  snap.forEach(d => {
-    if (d.id === me.uid) return;
-    const u = d.data();
-    const div = document.createElement('div');
-    div.className = 'modal-user';
-    div.innerHTML = `<div class="mu-av">${(u.name||'U')[0].toUpperCase()}</div><div><div class="mu-name">${esc(u.name)}</div><div class="mu-handle">@${esc(u.username)}</div></div>`;
-    div.onclick = () => { hideNewChat(); openChatWithUser(d.id); };
-    results.appendChild(div);
-  });
-  if (snap.empty) results.innerHTML = '<div style="padding:12px;text-align:center;color:#536471;font-size:13px">Никого не нашли</div>';
-};
-window.closeChatMobile = () => document.getElementById('chat-window').classList.remove('open');
-window.handleKey = e => { if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } };
-window.autoResize = el => { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; };
+// Вспомогательные функции
+function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function timeAgo(d) {
-  const s = Math.floor((Date.now()-d)/1000);
-  if (s<60) return 'только что';
-  if (s<3600) return Math.floor(s/60)+' мин';
-  if (s<86400) return Math.floor(s/3600)+' ч';
+  if (!d) return '';
+  const s = Math.floor((Date.now() - d) / 1000);
+  if (s < 60) return 'только что';
+  if (s < 3600) return Math.floor(s/60)+' мин';
+  if (s < 86400) return Math.floor(s/3600)+' ч';
   return Math.floor(s/86400)+' д';
 }
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function getChatId(a, b) { return [a,b].sort().join('_'); }
+
+console.log("✅ Script fully loaded");
 </script>
 
 </body>
