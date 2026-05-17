@@ -9,44 +9,26 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 
-<!-- Firebase CDN (compat) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <style>
-
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: 'Nunito', -apple-system, sans-serif;
-  height: 100vh;
-  display: flex;
-  overflow: hidden;
-  transition: background 0.3s, color 0.3s;
-}
+body { font-family: 'Nunito', -apple-system, sans-serif; height: 100vh; display: flex; overflow: hidden; transition: background 0.3s, color 0.3s; }
 body.light { background: #FFFFFF; color: #0F1419; }
 body.dark { background: #000000; color: #E7E9EA; }
-
 #stars-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; display: none; }
 body.dark #stars-canvas { display: block; }
 
-/* SIDEBAR */
-.sidebar {
-  width: 220px; min-width: 220px; height: 100vh;
-  display: flex; flex-direction: column; padding: 8px 12px 16px;
-  position: relative; z-index: 10;
-  transition: background 0.3s, border-color 0.3s;
-}
+.sidebar { width: 220px; min-width: 220px; height: 100vh; display: flex; flex-direction: column; padding: 8px 12px 16px; position: relative; z-index: 10; transition: background 0.3s, border-color 0.3s; }
 body.light .sidebar { background: #FFFFFF; border-right: 1px solid #EFF3F4; }
 body.dark .sidebar { background: #000000; border-right: 1px solid #2F3336; }
-
 .s-logo { display: flex; align-items: center; gap: 10px; padding: 12px 12px 20px; }
 .s-logo-icon { width: 34px; height: 34px; background: #1D9BF0; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .s-logo-text { font-size: 20px; font-weight: 800; letter-spacing: -0.03em; transition: color 0.3s; }
 body.light .s-logo-text { color: #0F1419; }
 body.dark .s-logo-text { color: #E7E9EA; }
-
 .s-item { display: flex; align-items: center; gap: 16px; padding: 12px 16px; border-radius: 9999px; font-size: 17px; font-weight: 700; cursor: pointer; transition: background 0.15s, color 0.15s; text-decoration: none; }
 body.light .s-item { color: #0F1419; }
 body.dark .s-item { color: #E7E9EA; }
@@ -54,12 +36,10 @@ body.light .s-item:hover { background: #E7E9EA; }
 body.dark .s-item:hover { background: #181818; }
 .s-item.active { color: #1D9BF0; }
 .s-item i { font-size: 22px; }
-
 .s-divider { height: 1px; margin: 8px 0; transition: background 0.3s; }
 body.light .s-divider { background: #EFF3F4; }
 body.dark .s-divider { background: #2F3336; }
 .s-bottom { margin-top: auto; }
-
 .s-user { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 9999px; cursor: pointer; transition: background 0.15s; }
 body.light .s-user:hover { background: #E7E9EA; }
 body.dark .s-user:hover { background: #181818; }
@@ -70,7 +50,6 @@ body.dark .s-uname { color: #E7E9EA; }
 .s-uhandle { font-size: 13px; transition: color 0.3s; }
 body.light .s-uhandle { color: #536471; }
 body.dark .s-uhandle { color: #71767B; }
-
 .theme-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 9999px; cursor: pointer; font-size: 15px; font-weight: 700; transition: background 0.15s; margin-top: 4px; }
 body.light .theme-row { color: #0F1419; }
 body.dark .theme-row { color: #E7E9EA; }
@@ -80,10 +59,7 @@ body.dark .theme-row:hover { background: #181818; }
 .toggle-pill { width: 42px; height: 24px; border-radius: 12px; position: relative; margin-left: auto; transition: background 0.25s; flex-shrink: 0; }
 .toggle-dot { width: 20px; height: 20px; border-radius: 50%; background: white; position: absolute; top: 2px; transition: left 0.25s; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
 
-/* MAIN */
 .main { flex: 1; display: flex; overflow: hidden; position: relative; z-index: 1; }
-
-/* Messages specific */
 .msgs-wrap { flex: 1; display: flex; overflow: hidden; position: relative; z-index: 1; }
 .chats-panel { width: 300px; min-width: 300px; display: flex; flex-direction: column; transition: border-color 0.3s; }
 body.light .chats-panel { border-right: 1px solid #EFF3F4; background: #FFFFFF; }
@@ -125,7 +101,6 @@ body.dark .ci-time { color: #71767B; }
 body.light .empty-chats { color: #536471; }
 body.dark .empty-chats { color: #71767B; }
 
-/* Chat window */
 .chat-window { flex: 1; display: flex; flex-direction: column; transition: background 0.3s; }
 body.light .chat-window { background: #FFFFFF; }
 body.dark .chat-window { background: #000000; }
@@ -168,7 +143,6 @@ body.dark .chat-input { border: 1px solid #2F3336; background: #16181C; color: #
 .btn-send:hover { background: #1A8CD8; }
 .btn-send i { font-size: 17px; color: white; }
 
-/* Modal */
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center; }
 .modal-overlay.show { display: flex; }
 .modal { border-radius: 16px; width: 100%; max-width: 360px; padding: 24px; transition: all 0.3s; }
@@ -204,7 +178,6 @@ body.dark .back-btn:hover { background: #181818; }
 
 @media (max-width: 640px) {
   .sidebar { display: none; }
-  .mob-nav { display: block; }
   .chats-panel { width: 100%; min-width: unset; border-right: none; }
   .chat-window { display: none; position: fixed; inset: 0; z-index: 50; padding-bottom: 60px; }
   .chat-window.open { display: flex; flex-direction: column; }
@@ -332,8 +305,6 @@ if (localStorage.getItem('theme') === 'dark') toggleTheme();
 </script>
 
 <script>
-console.log("=== FULL CHAT v2 LOADED ===");
-
 const firebaseConfig = {
   apiKey: "AIzaSyCeveXncaJYszckdflfTVWCDc0AwNilR9k",
   authDomain: "costax-aed53.firebaseapp.com",
@@ -350,23 +321,7 @@ const db = firebase.firestore();
 let me = null;
 let myProfile = null;
 let activeChatId = null;
-
-auth.onAuthStateChanged(async (user) => {
-  if (!user) return window.location.href = '/login';
-  me = user;
-
-  const pd = await db.collection('users').doc(user.uid).get();
-  if (!pd.exists) return window.location.href = '/profile.html?setup=1';
-
-  myProfile = pd.data();
-  console.log("✅ Profile loaded:", myProfile.name);
-
-  document.getElementById('sidebar-av').textContent = (myProfile.name || 'U')[0].toUpperCase();
-  document.getElementById('sidebar-name').textContent = myProfile.name || '';
-  document.getElementById('sidebar-handle').textContent = '@' + (myProfile.username || '');
-
-  loadChats();
-});
+let msgsUnsubscribe = null;
 
 function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
@@ -379,54 +334,46 @@ function timeAgo(d) {
   return Math.floor(s/86400)+' д';
 }
 
+function fmtTime(ts) {
+  if (!ts) return '';
+  return new Date(ts.toDate()).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+}
+
+auth.onAuthStateChanged(async (user) => {
+  if (!user) return window.location.href = '/login';
+  me = user;
+  const pd = await db.collection('users').doc(user.uid).get();
+  if (!pd.exists) return window.location.href = '/profile.html?setup=1';
+  myProfile = pd.data();
+  document.getElementById('sidebar-av').textContent = (myProfile.name || 'U')[0].toUpperCase();
+  document.getElementById('sidebar-name').textContent = myProfile.name || '';
+  document.getElementById('sidebar-handle').textContent = '@' + (myProfile.username || '');
+  loadChats();
+});
+
 let chatsUnsubscribe = null;
 
 function loadChats() {
-  console.log("📋 Starting loadChats for user:", me?.uid);
-
-  if (chatsUnsubscribe) {
-    chatsUnsubscribe();
-    console.log("🔄 Unsubscribed from previous chats listener");
-  }
-
+  if (chatsUnsubscribe) chatsUnsubscribe();
   const q = db.collection('chats').where('members', 'array-contains', me.uid);
-
-  chatsUnsubscribe = q.onSnapshot(
-    async (snap) => {
-      console.log("📡 Snapshot received. Empty?", snap.empty, "Size:", snap.size);
-
-      const list = document.getElementById('chats-list');
-      list.innerHTML = '';
-
-      if (snap.empty) {
-        list.innerHTML = `<div class="empty-chats">Нет сообщений.<br>Нажми «+ Новый» чтобы написать.</div>`;
-        return;
-      }
-
-      console.log(`📬 Found ${snap.size} chats`);
-
-      const chatElements = await Promise.all(
-        snap.docs.map(async (doc) => {
-          const chat = { id: doc.id, ...doc.data() };
-          return await renderChatItem(chat);
-        })
-      );
-
-      chatElements.forEach(el => list.appendChild(el));
-      console.log("✅ Chats rendered");
-    },
-    (error) => {
-      console.error("❌ Chats snapshot error:", error.code, error.message);
-      console.error("Full error:", error);
+  chatsUnsubscribe = q.onSnapshot(async (snap) => {
+    const list = document.getElementById('chats-list');
+    list.innerHTML = '';
+    if (snap.empty) {
+      list.innerHTML = `<div class="empty-chats">Нет сообщений.<br>Нажми «+ Новый» чтобы написать.</div>`;
+      return;
     }
-  );
+    const chatElements = await Promise.all(snap.docs.map(doc => renderChatItem({ id: doc.id, ...doc.data() })));
+    chatElements.forEach(el => list.appendChild(el));
+  }, (error) => {
+    console.error('Chats error:', error);
+  });
 }
 
 async function renderChatItem(chat) {
   const otherId = chat.members.find(id => id !== me.uid);
   const od = await db.collection('users').doc(otherId).get();
-  const other = od.exists ? od.data() : {name: 'Пользователь'};
-
+  const other = od.exists ? od.data() : { name: 'Пользователь', username: '' };
   const div = document.createElement('div');
   div.className = 'chat-item';
   div.dataset.chatId = chat.id;
@@ -444,50 +391,142 @@ async function renderChatItem(chat) {
 
 window.openChat = function(chatId, other) {
   activeChatId = chatId;
-  console.log("Открыт чат:", chatId);
-  // TODO: здесь позже добавим загрузку сообщений и правую панель
+
+  // Показать правую панель
+  document.getElementById('chat-empty').style.display = 'none';
+  const chatActive = document.getElementById('chat-active');
+  chatActive.style.display = 'flex';
+
+  // Шапка чата
+  document.getElementById('chat-av').textContent = (other.name||'U')[0].toUpperCase();
+  document.getElementById('chat-name').textContent = other.name || 'Пользователь';
+  document.getElementById('chat-handle').textContent = '@' + (other.username || '');
+
+  // На мобильном открыть окно
+  document.getElementById('chat-window').classList.add('open');
+
+  // Отметить активный чат в списке
+  document.querySelectorAll('.chat-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.chatId === chatId);
+  });
+
+  // Отписаться от предыдущего чата
+  if (msgsUnsubscribe) msgsUnsubscribe();
+
+  // Загрузить сообщения
+  const msgsEl = document.getElementById('chat-messages');
+  msgsEl.innerHTML = '';
+
+  msgsUnsubscribe = db.collection('chats').doc(chatId)
+    .collection('messages')
+    .orderBy('ts')
+    .limitToLast(50)
+    .onSnapshot(snap => {
+      msgsEl.innerHTML = '';
+      snap.forEach(doc => {
+        const m = doc.data();
+        const isMine = m.uid === me.uid;
+        const div = document.createElement('div');
+        div.className = 'msg ' + (isMine ? 'mine' : 'theirs');
+        div.innerHTML = `
+          <div class="msg-bubble">${esc(m.text)}</div>
+          <div class="msg-time">${fmtTime(m.ts)}</div>
+        `;
+        msgsEl.appendChild(div);
+      });
+      msgsEl.scrollTop = msgsEl.scrollHeight;
+    });
+};
+
+window.sendMsg = async function() {
+  const input = document.getElementById('msg-input');
+  const text = input.value.trim();
+  if (!text || !activeChatId) return;
+  input.value = '';
+  input.style.height = 'auto';
+
+  const ref = db.collection('chats').doc(activeChatId);
+  await ref.collection('messages').add({
+    text,
+    uid: me.uid,
+    ts: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  await ref.update({
+    lastMsg: text,
+    lastAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+};
+
+window.handleKey = function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMsg();
+  }
+};
+
+window.autoResize = function(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+};
+
+window.closeChatMobile = function() {
+  document.getElementById('chat-window').classList.remove('open');
 };
 
 window.showNewChat = function() {
-  const username = prompt("Введите username пользователя, которому хотите написать:");
-  if (!username) return;
+  document.getElementById('modal-overlay').classList.add('show');
+  document.getElementById('modal-search').value = '';
+  document.getElementById('modal-results').innerHTML = '';
+  setTimeout(() => document.getElementById('modal-search').focus(), 100);
+};
 
-  db.collection('users').where('username', '==', username.toLowerCase()).get()
-    .then(snapshot => {
-      if (snapshot.empty) {
-        alert("Пользователь с таким username не найден");
-        return;
-      }
-      const userDoc = snapshot.docs[0];
-      openChatWithUser(userDoc.id);
-    })
-    .catch(e => console.error("Search error:", e));
+window.hideNewChat = function() {
+  document.getElementById('modal-overlay').classList.remove('show');
+};
+
+window.searchForUser = async function(val) {
+  const q = val.trim().toLowerCase().replace('@', '');
+  const res = document.getElementById('modal-results');
+  res.innerHTML = '';
+  if (!q || q.length < 2) return;
+  const snap = await db.collection('users').where('username', '>=', q).where('username', '<=', q + '\uf8ff').limit(5).get();
+  if (snap.empty) {
+    res.innerHTML = '<div style="padding:10px;font-size:13px;color:#536471;">Пользователь не найден</div>';
+    return;
+  }
+  snap.forEach(doc => {
+    if (doc.id === me.uid) return;
+    const u = doc.data();
+    const div = document.createElement('div');
+    div.className = 'modal-user';
+    div.innerHTML = `
+      <div class="mu-av">${(u.name||'U')[0].toUpperCase()}</div>
+      <div>
+        <div class="mu-name">${esc(u.name)}</div>
+        <div class="mu-handle">@${esc(u.username)}</div>
+      </div>
+    `;
+    div.onclick = () => { hideNewChat(); openChatWithUser(doc.id); };
+    res.appendChild(div);
+  });
 };
 
 window.openChatWithUser = async function(targetUid) {
   if (!me || targetUid === me.uid) return;
-
   const chatId = [me.uid, targetUid].sort().join('_');
-
   const chatRef = db.collection('chats').doc(chatId);
   const chatSnap = await chatRef.get();
-
   if (!chatSnap.exists) {
     await chatRef.set({
       members: [me.uid, targetUid],
       lastMsg: '',
       lastAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-    console.log("✅ Новый чат создан:", chatId);
   }
-
   const otherSnap = await db.collection('users').doc(targetUid).get();
-  const other = otherSnap.exists ? otherSnap.data() : { name: 'Пользователь' };
-
+  const other = otherSnap.exists ? otherSnap.data() : { name: 'Пользователь', username: '' };
   openChat(chatId, other);
 };
-
-console.log("=== FULL CHAT v2 READY ===");
 </script>
 
 </body>
