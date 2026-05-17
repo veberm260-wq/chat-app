@@ -318,7 +318,6 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Устанавливаем persistence явно (LOCAL = сохраняется между перезагрузками)
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.error);
 
 let me = null;
@@ -342,21 +341,19 @@ function fmtTime(ts) {
   return new Date(ts.toDate()).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
 }
 
-// Исправленная авторизация — не редиректим сразу при первом null
-auth.onAuthStateChanged(async (user) => {
-  if (!user) {
-    // Даём Firebase время восстановить сессию
-    setTimeout(() => {
-      if (!auth.currentUser) {
-        window.location.href = '/login';
-      }
-    }, 1200);
-    return;
+// Простая и надёжная авторизация (по твоему запросу)
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    me = user;
+    init();
+  } else {
+    window.location.href = '/login.html';
   }
+});
 
-  me = user;
+async function init() {
+  const pd = await db.collection('users').doc(me.uid).get();
 
-  const pd = await db.collection('users').doc(user.uid).get();
   if (!pd.exists) {
     window.location.href = '/profile.html?setup=1';
     return;
@@ -369,7 +366,7 @@ auth.onAuthStateChanged(async (user) => {
   document.getElementById('sidebar-handle').textContent = '@' + (myProfile.username || '');
 
   loadChats();
-});
+}
 
 let chatsUnsubscribe = null;
 
