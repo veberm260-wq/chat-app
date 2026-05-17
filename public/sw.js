@@ -1,8 +1,20 @@
-const CACHE = 'costax-v1';
-const ASSETS = ['/', '/login', '/messages.html', '/profile.html'];
+const CACHE = 'costax-v2';
+const ASSETS = ['/', '/login', '/messages.html', '/profile.html', '/user.html'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
+  e.waitUntil(
+    caches.open(CACHE).then(c => {
+      return Promise.allSettled(ASSETS.map(url => c.add(url).catch(() => {})));
+    })
+  );
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys => Promise.all(
+      keys.filter(k => k !== CACHE).map(k => caches.delete(k))
+    ))
+  );
 });
 
 self.addEventListener('fetch', e => {
