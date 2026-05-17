@@ -332,14 +332,8 @@ if (localStorage.getItem('theme') === 'dark') toggleTheme();
 </script>
 
 <script>
-console.log("=== CHAT SCRIPT LOADED ===");
+console.log("=== CHAT SCRIPT LOADED (CDN) ===");
 
-let me = null;
-let myProfile = null;
-let activeChatId = null;
-let msgUnsub = null;
-
-// === Firebase ===
 const firebaseConfig = {
   apiKey: "AIzaSyCeveXncaJYszckdflfTVWCDc0AwNilR9k",
   authDomain: "costax-aed53.firebaseapp.com",
@@ -350,8 +344,13 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+
 const auth = firebase.auth();
 const db = firebase.firestore();
+
+let me = null;
+let myProfile = null;
+let activeChatId = null;
 
 auth.onAuthStateChanged(async (user) => {
   console.log("🔥 Auth state:", user ? user.uid : "null");
@@ -359,20 +358,23 @@ auth.onAuthStateChanged(async (user) => {
   if (!user) return window.location.href = '/login';
 
   me = user;
-  const pd = await db.collection('users').doc(user.uid).get();
-  if (!pd.exists) return window.location.href = '/profile.html?setup=1';
+  try {
+    const pd = await db.collection('users').doc(user.uid).get();
+    if (!pd.exists) return window.location.href = '/profile.html?setup=1';
 
-  myProfile = pd.data();
-  console.log("✅ Profile loaded:", myProfile.name);
+    myProfile = pd.data();
+    console.log("✅ Profile loaded:", myProfile.name);
 
-  document.getElementById('sidebar-av').textContent = (myProfile.name || 'U')[0].toUpperCase();
-  document.getElementById('sidebar-name').textContent = myProfile.name || '';
-  document.getElementById('sidebar-handle').textContent = '@' + (myProfile.username || '');
+    document.getElementById('sidebar-av').textContent = (myProfile.name || 'U')[0].toUpperCase();
+    document.getElementById('sidebar-name').textContent = myProfile.name || '';
+    document.getElementById('sidebar-handle').textContent = '@' + (myProfile.username || '');
 
-  loadChats();
+    loadChats();
+  } catch (e) {
+    console.error("❌ Auth error:", e);
+  }
 });
 
-// === Функции ===
 function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function timeAgo(d) {
@@ -384,52 +386,11 @@ function timeAgo(d) {
   return Math.floor(s/86400)+' д';
 }
 
-function getChatId(a, b) { return [a,b].sort().join('_'); }
-
 function loadChats() {
   console.log("📋 Loading chats...");
-  const q = db.collection('chats').where('members', 'array-contains', me.uid);
-  q.onSnapshot(async (snap) => {
-    const list = document.getElementById('chats-list');
-    list.innerHTML = '';
-    if (snap.empty) {
-      list.innerHTML = `<div class="empty-chats">Нет сообщений.<br>Нажми «+ Новый»</div>`;
-      return;
-    }
-    for (const d of snap.docs) {
-      const chat = { id: d.id, ...d.data() };
-      const el = await renderChatItem(chat);
-      list.appendChild(el);
-    }
-  });
 }
 
-async function renderChatItem(chat) {
-  const otherId = chat.members.find(id => id !== me.uid);
-  const od = await db.collection('users').doc(otherId).get();
-  const other = od.exists ? od.data() : { name: 'Пользователь' };
-
-  const div = document.createElement('div');
-  div.className = 'chat-item';
-  div.dataset.chatId = chat.id;
-  div.innerHTML = `
-    <div class="ci-av">${(other.name||'U')[0].toUpperCase()}</div>
-    <div class="ci-info">
-      <div class="ci-name">${esc(other.name)}</div>
-      <div class="ci-last">${esc(chat.lastMsg || 'Начни переписку')}</div>
-    </div>
-    <div class="ci-time">${chat.lastAt ? timeAgo(chat.lastAt.toDate()) : ''}</div>
-  `;
-  div.onclick = () => openChat(chat.id, other);
-  return div;
-}
-
-window.openChat = function(chatId, other) {
-  console.log("Открыт чат:", chatId);
-  activeChatId = chatId;
-};
-
-console.log("=== FULL CHAT SCRIPT READY ===");
+console.log("=== FULL CHAT SCRIPT READY (CDN) ===");
 </script>
 
 </body>
