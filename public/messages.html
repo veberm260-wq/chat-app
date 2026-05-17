@@ -306,7 +306,7 @@ if (localStorage.getItem('theme') === 'dark') toggleTheme();
 
 <script>
 const firebaseConfig = {
-  apiKey: "AIzaSy...lR9k",
+  apiKey: "AIzaSyCeveXncaJYszckdflfTVWCDc0AwNilR9k",
   authDomain: "costax-aed53.firebaseapp.com",
   projectId: "costax-aed53",
   storageBucket: "costax-aed53.firebasestorage.app",
@@ -341,7 +341,6 @@ function fmtTime(ts) {
   return new Date(ts.toDate()).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
 }
 
-// Простая и надёжная авторизация (по твоему запросу)
 auth.onAuthStateChanged((user) => {
   if (user) {
     me = user;
