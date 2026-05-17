@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Costax — Сообщения</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+    }
+    .app {
+      display: flex;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .sidebar {
+      width: 280px;
+      background: #111;
+      border-right: 1px solid #222;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .chat-header {
+      padding: 16px 20px;
+      background: #111;
+      border-bottom: 1px solid #222;
+      font-weight: 600;
+    }
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .message {
+      max-width: 70%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      line-height: 1.4;
+    }
+    .message.mine {
+      align-self: flex-end;
+      background: #1d9bf0;
+    }
+    .message.theirs {
+      align-self: flex-start;
+      background: #222;
+    }
+    .input-area {
+      padding: 16px 20px;
+      background: #111;
+      border-top: 1px solid #222;
+      display: flex;
+      gap: 10px;
+    }
+    .input-area input {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 9999px;
+      border: 1px solid #333;
+      background: #1a1a1a;
+      color: white;
+      font-size: 15px;
+    }
+    .input-area button {
+      padding: 12px 24px;
+      background: #1d9bf0;
+      color: white;
+      border: none;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+    .chat-item {
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 6px;
+      cursor: pointer;
+    }
+    .chat-item:hover { background: #1a1a1a; }
+    .chat-item.active { background: #1f2a3a; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Список чатов -->
+    <div class="sidebar">
+      <h3>Чаты</h3>
+      <div id="chats-list"></div>
+    </div>
+
+    <!-- Чат -->
+    <div class="main">
+      <div id="chat-header" class="chat-header" style="display:none;"></div>
+      
+      <div id="messages" class="messages"></div>
+
+      <div class="input-area" id="input-area" style="display:none;">
+        <input type="text" id="msg-input" placeholder="Напишите сообщение...">
+        <button onclick="sendMessage()">Отправить</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { 
+      getFirestore, collection, addDoc, onSnapshot, orderBy, query, 
+      doc, getDoc, setDoc, serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSy...lR9k",
+      authDomain: "costax-aed53.firebaseapp.com",
+      projectId: "costax-aed53",
+      storageBucket: "costax-aed53.firebasestorage.app",
+      messagingSenderId: "747179946604",
+      appId: "1:747179946604:web:073d7faf7d80fb40041e49"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let currentChatId = null;
+    let unsubscribe = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = '/login';
+        return;
+      }
+      currentUser = user;
+      loadMyChats();
+    });
+
+    // Загрузка списка чатов пользователя
+    async function loadMyChats() {
+      const chatsRef = collection(db, 'chats');
+      const q = query(chatsRef);
+
+      onSnapshot(q, async (snapshot) => {
+        const list = document.getElementById('chats-list');
+        list.innerHTML = '';
+
+        for (const docSnap of snapshot.docs) {
+          const chat = docSnap.data();
+          if (!chat.members || !chat.members.includes(currentUser.uid)) continue;
+
+          const otherId = chat.members.find(id => id !== currentUser.uid);
+          const userDoc = await getDoc(doc(db, 'users', otherId));
+          const otherUser = userDoc.exists() ? userDoc.data() : { name: 'Пользователь' };
+
+          const div = document.createElement('div');
+          div.className = 'chat-item';
+          div.innerHTML = `<strong>${otherUser.name}</strong>`;
+          div.onclick = () => openChat(docSnap.id, otherUser);
+          list.appendChild(div);
+        }
+      });
+    }
+
+    // Открыть чат
+    function openChat(chatId, otherUser) {
+      currentChatId = chatId;
+      document.getElementById('chat-header').innerHTML = otherUser.name;
+      document.getElementById('chat-header').style.display = 'block';
+      document.getElementById('input-area').style.display = 'flex';
+      document.getElementById('messages').innerHTML = '';
+
+      if (unsubscribe) unsubscribe();
+
+      const messagesRef = collection(db, 'chats', chatId, 'messages');
+      const q = query(messagesRef, orderBy('createdAt'));
+
+      unsubscribe = onSnapshot(q, (snapshot) => {
+        const container = document.getElementById('messages');
+        container.innerHTML = '';
+
+        snapshot.forEach((doc) => {
+          const msg = doc.data();
+          const div = document.createElement('div');
+          div.className = `message ${msg.senderId === currentUser.uid ? 'mine' : 'theirs'}`;
+          div.innerHTML = msg.text;
+          container.appendChild(div);
+        });
+
+        container.scrollTop = container.scrollHeight;
+      });
+    }
+
+    // Отправить сообщение
+    window.sendMessage = async function() {
+      const input = document.getElementById('msg-input');
+      const text = input.value.trim();
+      if (!text || !currentChatId) return;
+
+      await addDoc(collection(db, 'chats', currentChatId, 'messages'), {
+        text: text,
+        senderId: currentUser.uid,
+        createdAt: serverTimestamp()
+      });
+
+      input.value = '';
+    };
+  </script>
+</body>
+</html>
