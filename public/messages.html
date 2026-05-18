@@ -281,7 +281,10 @@ body.dark .back-btn:hover { background: #181818; }
         <button class="back-btn" onclick="closeChatMobile()"><i class="ti ti-arrow-left"></i></button>
         <div class="ch-av" id="chat-av">А</div>
         <div>
-          <div class="ch-name" id="chat-name">Имя</div>
+          <div class="ch-name" id="chat-name" style="display:flex;align-items:center;gap:6px;">
+            Имя
+            <span id="chat-online" style="width:8px;height:8px;background:#22c55e;border-radius:50%;display:none;"></span>
+          </div>
           <div class="ch-handle" id="chat-handle">@username</div>
         </div>
       </div>
@@ -433,7 +436,23 @@ async function init() {
   document.getElementById('sidebar-handle').textContent = '@' + (myProfile.username || '');
 
   loadChats();
+
+  // Запрашиваем разрешение на уведомления
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+
+  // Устанавливаем статус онлайн
+  db.collection('users').doc(me.uid).update({ isOnline: true }).catch(console.error);
 }
+
+// Статус оффлайн при закрытии вкладки
+window.addEventListener('beforeunload', () => {
+  if (me) {
+    db.collection('users').doc(me.uid).update({ isOnline: false }).catch(() => {});
+  }
+});
+
 
 let chatsUnsubscribe = null;
 
@@ -510,6 +529,12 @@ window.openChat = function(chatId, other) {
   document.getElementById('chat-name').textContent = other.name || 'Пользователь';
   document.getElementById('chat-handle').textContent = '@' + (other.username || '');
 
+  // Показываем/скрываем онлайн-точку
+  const onlineDot = document.getElementById('chat-online');
+  if (onlineDot) {
+    onlineDot.style.display = other.isOnline ? 'inline-block' : 'none';
+  }
+
   document.getElementById('chat-window').classList.add('open');
 
   document.querySelectorAll('.chat-item').forEach(el => {
@@ -539,6 +564,17 @@ window.openChat = function(chatId, other) {
         msgsEl.appendChild(div);
       });
       msgsEl.scrollTop = msgsEl.scrollHeight;
+
+      // Push-уведомление если вкладка неактивна
+      if (!document.hidden && Notification.permission === 'granted') {
+        const lastMsg = snap.docs[snap.docs.length - 1]?.data();
+        if (lastMsg && lastMsg.uid !== me.uid) {
+          new Notification('Новое сообщение', {
+            body: lastMsg.text,
+            icon: '/icon-192.png'
+          });
+        }
+      }
     });
 };
 
