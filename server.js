@@ -1,10 +1,24 @@
+require('dotenv').config();
+
 const express = require('express');
 const http = require('http');
 const path = require('path');
+const admin = require('firebase-admin');
 
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
+
+// Инициализация Firebase Admin SDK
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    }),
+  });
+}
 
 // Статика из папки public
 app.use(express.static(path.join(__dirname, 'public')));
@@ -25,7 +39,6 @@ app.get('/messages.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'messages.html'));
 });
 
-// Главная — лента
 app.get('/sw.js', (req, res) => res.sendFile(path.join(__dirname, 'public', 'sw.js')));
 app.get('/manifest.json', (req, res) => res.sendFile(path.join(__dirname, 'public', 'manifest.json')));
 
@@ -36,7 +49,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// === FCM Push Endpoint ===
+// === FCM Push Endpoint (через Firebase Admin SDK) ===
 app.post('/api/send-push', async (req, res) => {
   const { token, title, body } = req.body;
 
@@ -44,37 +57,25 @@ app.post('/api/send-push', async (req, res) => {
     return res.status(400).json({ error: 'token, title и body обязательны' });
   }
 
-  // ВАЖНО: Замени на свой Server Key (Legacy) из Firebase Console
-  // Firebase Console → Project Settings → Cloud Messaging → Server key (Legacy)
-  const serverKey = 'YOUR_FCM_SERVER_KEY_HERE';
-
   try {
-    const response = await fetch('https://fcm.googleapis.com/fcm/send', {
-      method: 'POST',
-      headers: {
-        'Authorization': `key=${serverKey}`,
-        'Content-Type': 'application/json'
+    const message = {
+      notification: {
+        title: title,
+        body: body,
       },
-      body: JSON.stringify({
-        to: token,
-        notification: {
-          title: title,
-          body: body,
-          icon: '/icon-180.png'
-        },
-        data: {
-          click_action: '/messages.html'
-        }
-      })
-    });
+      data: {
+        click_action: '/messages.html',
+      },
+      token: token,
+    };
 
-    const result = await response.json();
-    console.log('FCM response:', result);
+    const response = await admin.messaging().send(message);
+    console.log('Push отправлен успешно:', response);
 
-    res.json({ success: true, result });
+    res.json({ success: true, messageId: response });
   } catch (error) {
-    console.error('FCM send error:', error);
-    res.status(500).json({ error: 'Failed to send push' });
+    console.error('Ошибка отправки push:', error);
+    res.status(500).json({ error: 'Failed to send push notification' });
   }
 });
 
