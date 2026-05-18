@@ -702,9 +702,12 @@ auth.onAuthStateChanged((user) => {
   }
 });
 
-async function sendPushNotification(fcmToken, title, body) {
-  console.log('Push должен быть отправлен на токен:', fcmToken);
-  console.log('Заголовок:', title, 'Текст:', body);
+async function sendPushNotification(fcmToken, senderName, messageText) {
+  if (!fcmToken) return;
+
+  console.log(`Отправка push: ${senderName} → "${messageText}"`);
+
+  // В реальном проекте здесь должен быть запрос на backend / Cloud Function
 }
 </script>
 
