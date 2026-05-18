@@ -15,7 +15,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
 
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -365,7 +365,7 @@ if (localStorage.getItem('theme') === 'dark') toggleTheme();
 
 <script>
 const firebaseConfig = {
-  apiKey: "AIzaSyCeveXncaJYszckdflfTVWCDc0AwNilR9k",
+  apiKey: "AIzaSy...lR9k",
   authDomain: "costax-aed53.firebaseapp.com",
   projectId: "costax-aed53",
   storageBucket: "costax-aed53.firebasestorage.app",
@@ -374,8 +374,8 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-    // FCM VAPID Key (замени на свой из Firebase Console)
-    const vapidKey = "BBhSK3Y9aEcyvVOHMmnBEbxgIl_NtijL96UFDZW_IuulFm_YDfmYESowBezZiHUa_4QDkK6IH88IPGeGKh9OW7o";
+
+const vapidKey = "BBhSK3Y9aEcyvVOHMmnBEbxgIl_NtijL96UFDZW_IuulFm_YDfmYESowBezZiHUa_4QDkK6IH88IPGeGKh9OW7o";
 const auth = firebase.auth();
 const db = firebase.firestore();
 
@@ -409,7 +409,6 @@ function getDefaultAvatar(gender) {
   } else if (gender === 'female') {
     return `<svg viewBox="0 0 24 24" width="100%" height="100%" fill="${color}"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/><circle cx="12" cy="6" r="1.5"/></svg>`;
   } else {
-    // neutral
     return `<svg viewBox="0 0 24 24" width="100%" height="100%" fill="${color}"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
   }
 }
@@ -456,7 +455,6 @@ window.addEventListener('beforeunload', () => {
   }
 });
 
-
 let chatsUnsubscribe = null;
 
 function loadChats() {
@@ -500,7 +498,6 @@ async function renderChatItem(chat) {
   div.className = 'chat-item';
   div.dataset.chatId = chat.id;
   
-  // Показываем синюю точку если есть непрочитанные
   const unreadHTML = chat.unreadCount > 0 
     ? `<div style="width:8px;height:8px;background:#1D9BF0;border-radius:50%;margin-left:6px;flex-shrink:0;"></div>` 
     : '';
@@ -532,7 +529,6 @@ window.openChat = function(chatId, other) {
   document.getElementById('chat-name').textContent = other.name || 'Пользователь';
   document.getElementById('chat-handle').textContent = '@' + (other.username || '');
 
-  // Показываем/скрываем онлайн-точку
   const onlineDot = document.getElementById('chat-online');
   if (onlineDot) {
     onlineDot.style.display = other.isOnline ? 'inline-block' : 'none';
@@ -568,7 +564,6 @@ window.openChat = function(chatId, other) {
       });
       msgsEl.scrollTop = msgsEl.scrollHeight;
 
-      // Push-уведомление если вкладка неактивна
       if (!document.hidden && Notification.permission === 'granted') {
         const lastMsg = snap.docs[snap.docs.length - 1]?.data();
         if (lastMsg && lastMsg.uid !== me.uid) {
@@ -672,13 +667,8 @@ window.openChatWithUser = async function(targetUid) {
 };
 </script>
 
-</body>
-</html>
-
 <script>
 // === FCM Push Notifications ===
-const vapidKey = "BBhSK3Y9aEcyvVOHMmnBEbxgIl_NtijL96UFDZW_IuulFm_YDfmYESowBezZiHUa_4QDkK6IH88IPGeGKh9OW7o";
-
 async function requestNotificationPermission() {
   try {
     const permission = await Notification.requestPermission();
@@ -707,7 +697,6 @@ async function requestNotificationPermission() {
   return null;
 }
 
-// Вызываем при загрузке, если пользователь авторизован
 auth.onAuthStateChanged((user) => {
   if (user) {
     setTimeout(() => {
@@ -716,9 +705,11 @@ auth.onAuthStateChanged((user) => {
   }
 });
 
-// === Отправка Push (заглушка) ===
 async function sendPushNotification(fcmToken, title, body) {
   console.log('Push должен быть отправлен на токен:', fcmToken);
   console.log('Заголовок:', title, 'Текст:', body);
 }
 </script>
+
+</body>
+</html>
