@@ -644,7 +644,8 @@ window.sendMsg = async function() {
   await ref.update({
     lastMsg: text,
     lastAt: firebase.firestore.FieldValue.serverTimestamp()
-  
+  });
+
   // Отправляем push через backend
   if (myProfile && myProfile.name) {
     // TODO: Получить fcmToken собеседника
