@@ -223,6 +223,28 @@ body.dark .back-btn:hover { background: #181818; }
 .bottom-nav-item i {
   font-size: 22px;
 }
+
+/* Кнопка включения уведомлений */
+#enable-notifications-btn {
+  position: fixed;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1D9BF0;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 1000;
+  display: none;
+  box-shadow: 0 4px 12px rgba(29, 155, 240, 0.3);
+}
+#enable-notifications-btn:hover {
+  background: #1A8CD8;
+}
 </style>
 </head>
 <body class="light">
@@ -313,6 +335,11 @@ body.dark .back-btn:hover { background: #181818; }
     <span>Профиль</span>
   </a>
 </div>
+
+<!-- Кнопка включения уведомлений -->
+<button id="enable-notifications-btn" onclick="enableNotifications()">
+  🔔 Включить уведомления
+</button>
 
 <div class="modal-overlay" id="modal-overlay" onclick="hideNewChat()">
   <div class="modal" onclick="event.stopPropagation()">
@@ -439,13 +466,41 @@ async function init() {
 
   loadChats();
 
-  if ('Notification' in window && Notification.permission === 'default') {
-    Notification.requestPermission();
-  }
+  // Показываем кнопку уведомлений, если ещё не разрешены
+  showNotificationButtonIfNeeded();
 
   db.collection('users').doc(me.uid).update({ isOnline: true }).catch(console.error);
 }
 
+// Показать кнопку "Включить уведомления" если нужно
+function showNotificationButtonIfNeeded() {
+  const btn = document.getElementById('enable-notifications-btn');
+  if (btn && 'Notification' in window && Notification.permission === 'default') {
+    btn.style.display = 'block';
+  }
+}
+
+// Включить уведомления по клику
+async function enableNotifications() {
+  const btn = document.getElementById('enable-notifications-btn');
+  if (!btn) return;
+
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      btn.style.display = 'none';
+      // После разрешения можно запросить FCM токен
+      requestNotificationPermission();
+    } else {
+      btn.style.display = 'none';
+    }
+  } catch (e) {
+    console.error('Ошибка при запросе уведомлений:', e);
+    btn.style.display = 'none';
+  }
+}
+
+// Статус оффлайн при закрытии вкладки
 window.addEventListener('beforeunload', () => {
   if (me) {
     db.collection('users').doc(me.uid).update({ isOnline: false }).catch(() => {});
@@ -589,11 +644,6 @@ window.sendMsg = async function() {
   await ref.update({
     lastMsg: text,
     lastAt: firebase.firestore.FieldValue.serverTimestamp()
-  
-  // Отправляем push-уведомление собеседнику
-  if (myProfile && myProfile.name) {
-    console.log("Push notification should be sent");
-  }
   });
 };
 
@@ -661,11 +711,6 @@ window.openChatWithUser = async function(targetUid) {
       members: [me.uid, targetUid],
       lastMsg: '',
       lastAt: firebase.firestore.FieldValue.serverTimestamp()
-  
-  // Отправляем push-уведомление собеседнику
-  if (myProfile && myProfile.name) {
-    console.log("Push notification should be sent");
-  }
     });
   }
   const otherSnap = await db.collection('users').doc(targetUid).get();
@@ -684,7 +729,6 @@ async function requestNotificationPermission() {
       return null;
     }
 
-    // Регистрируем Service Worker для FCM
     await navigator.serviceWorker.register('/firebase-messaging-sw.js');
     const registration = await navigator.serviceWorker.ready;
 
@@ -710,14 +754,6 @@ async function requestNotificationPermission() {
   }
   return null;
 }
-
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    setTimeout(() => {
-      requestNotificationPermission();
-    }, 2000);
-  }
-});
 
 async function sendPushNotification(fcmToken, senderName, messageText) {
   if (!fcmToken) return;
