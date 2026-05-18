@@ -22,3 +22,26 @@ self.addEventListener('fetch', e => {
     fetch(e.request).catch(() => caches.match(e.request))
   );
 });
+
+// Push Notification Handler
+self.addEventListener('push', event => {
+  const data = event.data.json();
+  const title = data.title || 'Новое сообщение';
+  const options = {
+    body: data.body || '',
+    icon: '/icon-180.png',
+    badge: '/icon-180.png',
+    data: data
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil(
+    clients.openWindow('/messages.html')
+  );
+});

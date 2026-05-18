@@ -15,6 +15,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
 
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -373,6 +374,8 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+    // FCM VAPID Key (замени на свой из Firebase Console)
+    const vapidKey = "YOUR_VAPID_KEY_HERE";
 const auth = firebase.auth();
 const db = firebase.firestore();
 
@@ -671,3 +674,63 @@ window.openChatWithUser = async function(targetUid) {
 
 </body>
 </html>
+// === FCM Push Notifications ===
+async function requestNotificationPermission() {
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      console.log('Уведомления отклонены');
+      return null;
+    }
+
+    const messaging = firebase.messaging();
+    const token = await messaging.getToken({ vapidKey });
+
+    if (token) {
+      const user = firebase.auth().currentUser;
+      if (user) {
+        await firebase.firestore()
+          .collection('users')
+          .doc(user.uid)
+          .set({ fcmToken: token }, { merge: true });
+        console.log('FCM Token сохранён:', token);
+      }
+      return token;
+    }
+  } catch (error) {
+    console.error('Ошибка при получении FCM токена:', error);
+  }
+  return null;
+}
+
+// Вызываем при загрузке, если пользователь авторизован
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    // Запрашиваем разрешение на уведомления
+    setTimeout(() => {
+      requestNotificationPermission();
+    }, 2000);
+  }
+});
+
+// === Отправка Push через FCM REST API (ВНИМАНИЕ: Server Key должен храниться на сервере!) ===
+async function sendPushNotification(fcmToken, title, body) {
+  // В реальном проекте это должно делаться через Cloud Functions или backend
+  // Здесь заглушка для примера
+  console.log('Push должен быть отправлен на токен:', fcmToken);
+  console.log('Заголовок:', title, 'Текст:', body);
+  
+  // Пример REST запроса (НЕ ДЕЛАЙТЕ ТАК В ПРОДАКШЕНЕ - ключ утекёт)
+  // const serverKey = 'YOUR_SERVER_KEY';
+  // await fetch('https://fcm.googleapis.com/fcm/send', {
+  //   method: 'POST',
+  //   headers: {
+  //     'Authorization': `key=${serverKey}`,
+  //     'Content-Type': 'application/json'
+  //   },
+  //   body: JSON.stringify({
+  //     to: fcmToken,
+  //     notification: { title, body }
+  //   })
+  // });
+}
