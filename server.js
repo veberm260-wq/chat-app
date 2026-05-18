@@ -11,22 +11,15 @@ const PORT = process.env.PORT || 3000;
 console.log('PROJECT_ID:', process.env.FIREBASE_PROJECT_ID);
 console.log('CLIENT_EMAIL:', process.env.FIREBASE_CLIENT_EMAIL);
 
-// Инициализация Firebase Admin SDK (опционально)
-if (!admin.apps.length && process.env.FIREBASE_PROJECT_ID) {
-  try {
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n')
-      })
-    });
-    console.log('Firebase Admin инициализирован');
-  } catch(e) {
-    console.warn('Firebase Admin не инициализирован:', e.message);
-  }
-} else {
-  console.warn('FIREBASE_PROJECT_ID не задан — push уведомления недоступны');
+// Инициализация Firebase Admin SDK (работает и локально, и на Railway)
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n')
+    })
+  });
 }
 
 // Статика из папки public
