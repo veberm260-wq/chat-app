@@ -396,6 +396,18 @@ function fmtTime(ts) {
   return new Date(ts.toDate()).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
 }
 
+function getDefaultAvatar(gender) {
+  const color = '#1D9BF0';
+  if (gender === 'male') {
+    return `<svg viewBox="0 0 24 24" width="100%" height="100%" fill="${color}"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
+  } else if (gender === 'female') {
+    return `<svg viewBox="0 0 24 24" width="100%" height="100%" fill="${color}"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/><circle cx="12" cy="6" r="1.5"/></svg>`;
+  } else {
+    // neutral
+    return `<svg viewBox="0 0 24 24" width="100%" height="100%" fill="${color}"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
+  }
+}
+
 auth.onAuthStateChanged((user) => {
   if (user) {
     me = user;
@@ -415,7 +427,8 @@ async function init() {
 
   myProfile = pd.data();
 
-  document.getElementById('sidebar-av').textContent = (myProfile.name || 'U')[0].toUpperCase();
+  const sidebarAv = document.getElementById('sidebar-av');
+  sidebarAv.innerHTML = getDefaultAvatar(myProfile.gender);
   document.getElementById('sidebar-name').textContent = myProfile.name || '';
   document.getElementById('sidebar-handle').textContent = '@' + (myProfile.username || '');
 
@@ -470,8 +483,9 @@ async function renderChatItem(chat) {
     ? `<div style="width:8px;height:8px;background:#1D9BF0;border-radius:50%;margin-left:6px;flex-shrink:0;"></div>` 
     : '';
 
+  const avatarHTML = `<div class="ci-av">${getDefaultAvatar(other.gender)}</div>`;
   div.innerHTML = `
-    <div class="ci-av">${(other.name||'U')[0].toUpperCase()}</div>
+    ${avatarHTML}
     <div class="ci-info">
       <div class="ci-name">${esc(other.name)}</div>
       <div class="ci-last">${esc(chat.lastMsg || 'Начни переписку')}</div>
@@ -492,7 +506,7 @@ window.openChat = function(chatId, other) {
   const chatActive = document.getElementById('chat-active');
   chatActive.style.display = 'flex';
 
-  document.getElementById('chat-av').textContent = (other.name||'U')[0].toUpperCase();
+  document.getElementById('chat-av').innerHTML = getDefaultAvatar(other.gender);
   document.getElementById('chat-name').textContent = other.name || 'Пользователь';
   document.getElementById('chat-handle').textContent = '@' + (other.username || '');
 
