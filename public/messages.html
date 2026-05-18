@@ -11,12 +11,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
-
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Nunito', -apple-system, sans-serif; height: 100vh; display: flex; overflow: hidden; transition: background 0.3s, color 0.3s; }
@@ -24,7 +22,6 @@ body.light { background: #FFFFFF; color: #0F1419; }
 body.dark { background: #000000; color: #E7E9EA; }
 #stars-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; display: none; }
 body.dark #stars-canvas { display: block; }
-
 .sidebar { width: 220px; min-width: 220px; height: 100vh; display: flex; flex-direction: column; padding: 8px 12px 16px; position: relative; z-index: 10; transition: background 0.3s, border-color 0.3s; }
 body.light .sidebar { background: #FFFFFF; border-right: 1px solid #EFF3F4; }
 body.dark .sidebar { background: #000000; border-right: 1px solid #2F3336; }
@@ -62,7 +59,6 @@ body.dark .theme-row:hover { background: #181818; }
 .theme-row i { font-size: 20px; }
 .toggle-pill { width: 42px; height: 24px; border-radius: 12px; position: relative; margin-left: auto; transition: background 0.25s; flex-shrink: 0; }
 .toggle-dot { width: 20px; height: 20px; border-radius: 50%; background: white; position: absolute; top: 2px; transition: left 0.25s; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
-
 .main { flex: 1; display: flex; overflow: hidden; position: relative; z-index: 1; }
 .msgs-wrap { flex: 1; display: flex; overflow: hidden; position: relative; z-index: 1; }
 .chats-panel { width: 300px; min-width: 300px; display: flex; flex-direction: column; transition: border-color 0.3s; }
@@ -104,7 +100,6 @@ body.dark .ci-time { color: #71767B; }
 .empty-chats { padding: 40px 20px; text-align: center; font-size: 14px; font-weight: 600; line-height: 1.8; transition: color 0.3s; }
 body.light .empty-chats { color: #536471; }
 body.dark .empty-chats { color: #71767B; }
-
 .chat-window { flex: 1; display: flex; flex-direction: column; transition: background 0.3s; }
 body.light .chat-window { background: #FFFFFF; }
 body.dark .chat-window { background: #000000; }
@@ -146,7 +141,6 @@ body.dark .chat-input { border: 1px solid #2F3336; background: #16181C; color: #
 .btn-send { width: 38px; height: 38px; border-radius: 50%; background: #1D9BF0; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s; }
 .btn-send:hover { background: #1A8CD8; }
 .btn-send i { font-size: 17px; color: white; }
-
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center; }
 .modal-overlay.show { display: flex; }
 .modal { border-radius: 16px; width: 100%; max-width: 360px; padding: 24px; transition: all 0.3s; }
@@ -179,22 +173,7 @@ body.light .back-btn { color: #0F1419; }
 body.dark .back-btn { color: #E7E9EA; }
 body.light .back-btn:hover { background: #E7E9EA; }
 body.dark .back-btn:hover { background: #181818; }
-
-/* Mobile Bottom Navigation */
-.bottom-nav {
-  display: none;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  background: #000000;
-  border-top: 1px solid #2F3336;
-  z-index: 100;
-  align-items: center;
-  justify-content: space-around;
-}
-
+.bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: #000000; border-top: 1px solid #2F3336; z-index: 100; align-items: center; justify-content: space-around; }
 @media (max-width: 640px) {
   .sidebar { display: none; }
   .chats-panel { width: 100%; min-width: unset; border-right: none; padding-bottom: 60px; }
@@ -203,59 +182,18 @@ body.dark .back-btn:hover { background: #181818; }
   .back-btn { display: flex !important; }
   .bottom-nav { display: flex; }
 }
-
-.bottom-nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #71767B;
-  text-decoration: none;
-  font-size: 11px;
-  font-weight: 600;
-  gap: 4px;
-}
-
-.bottom-nav-item.active {
-  color: #1D9BF0;
-}
-
-.bottom-nav-item i {
-  font-size: 22px;
-}
-
-/* Кнопка включения уведомлений */
-#enable-notifications-btn {
-  position: fixed;
-  bottom: 70px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #1D9BF0;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 9999px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  z-index: 1000;
-  display: none;
-  box-shadow: 0 4px 12px rgba(29, 155, 240, 0.3);
-}
-#enable-notifications-btn:hover {
-  background: #1A8CD8;
-}
+.bottom-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #71767B; text-decoration: none; font-size: 11px; font-weight: 600; gap: 4px; }
+.bottom-nav-item.active { color: #1D9BF0; }
+.bottom-nav-item i { font-size: 22px; }
+#enable-notifications-btn { position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%); background: #1D9BF0; color: white; border: none; padding: 12px 24px; border-radius: 9999px; font-size: 14px; font-weight: 700; cursor: pointer; z-index: 1000; display: none; box-shadow: 0 4px 12px rgba(29,155,240,0.3); }
+#enable-notifications-btn:hover { background: #1A8CD8; }
 </style>
 </head>
 <body class="light">
-
 <canvas id="stars-canvas"></canvas>
-
 <div class="sidebar">
   <div class="s-logo">
-    <div class="s-logo-icon">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-    </div>
+    <div class="s-logo-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
     <span class="s-logo-text">Costax</span>
   </div>
   <a class="s-item" href="/"><i class="ti ti-home"></i>Главная</a>
@@ -279,7 +217,6 @@ body.dark .back-btn:hover { background: #181818; }
     </div>
   </div>
 </div>
-
 <div class="msgs-wrap">
   <div class="chats-panel">
     <div class="chats-top">
@@ -293,7 +230,6 @@ body.dark .back-btn:hover { background: #181818; }
       <div class="empty-chats">Нет сообщений.<br>Нажми «+ Новый» чтобы написать.</div>
     </div>
   </div>
-
   <div class="chat-window" id="chat-window">
     <div class="chat-empty" id="chat-empty">
       <i class="ti ti-message-2"></i>
@@ -304,10 +240,7 @@ body.dark .back-btn:hover { background: #181818; }
         <button class="back-btn" onclick="closeChatMobile()"><i class="ti ti-arrow-left"></i></button>
         <div class="ch-av" id="chat-av">А</div>
         <div>
-          <div class="ch-name" id="chat-name" style="display:flex;align-items:center;gap:6px;">
-            Имя
-            <span id="chat-online" style="width:8px;height:8px;background:#22c55e;border-radius:50%;display:none;"></span>
-          </div>
+          <div class="ch-name" id="chat-name" style="display:flex;align-items:center;gap:6px;">Имя<span id="chat-online" style="width:8px;height:8px;background:#22c55e;border-radius:50%;display:none;"></span></div>
           <div class="ch-handle" id="chat-handle">@username</div>
         </div>
       </div>
@@ -319,28 +252,12 @@ body.dark .back-btn:hover { background: #181818; }
     </div>
   </div>
 </div>
-
-<!-- Mobile Bottom Navigation -->
 <div class="bottom-nav">
-  <a href="/" class="bottom-nav-item">
-    <i class="ti ti-home"></i>
-    <span>Лента</span>
-  </a>
-  <a href="/messages.html" class="bottom-nav-item active">
-    <i class="ti ti-message"></i>
-    <span>Сообщения</span>
-  </a>
-  <a href="/profile.html" class="bottom-nav-item">
-    <i class="ti ti-user"></i>
-    <span>Профиль</span>
-  </a>
+  <a href="/" class="bottom-nav-item"><i class="ti ti-home"></i><span>Лента</span></a>
+  <a href="/messages.html" class="bottom-nav-item active"><i class="ti ti-message"></i><span>Сообщения</span></a>
+  <a href="/profile.html" class="bottom-nav-item"><i class="ti ti-user"></i><span>Профиль</span></a>
 </div>
-
-<!-- Кнопка включения уведомлений -->
-<button id="enable-notifications-btn" onclick="enableNotifications()">
-  🔔 Включить уведомления
-</button>
-
+<button id="enable-notifications-btn" onclick="enableNotifications()">🔔 Включить уведомления</button>
 <div class="modal-overlay" id="modal-overlay" onclick="hideNewChat()">
   <div class="modal" onclick="event.stopPropagation()">
     <h3>Новое сообщение</h3>
@@ -349,7 +266,6 @@ body.dark .back-btn:hover { background: #181818; }
     <button class="modal-close" onclick="hideNewChat()">Отмена</button>
   </div>
 </div>
-
 <script>
 function initStars() {
   const canvas = document.getElementById('stars-canvas');
@@ -358,9 +274,7 @@ function initStars() {
   function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
   function createStars() {
     stars = [];
-    for (let i = 0; i < 200; i++) {
-      stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*1.2+0.2, speed: 0.003+Math.random()*0.008, phase: Math.random()*Math.PI*2 });
-    }
+    for (let i = 0; i < 200; i++) stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*1.2+0.2, speed: 0.003+Math.random()*0.008, phase: Math.random()*Math.PI*2 });
   }
   function draw(t) {
     ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -376,7 +290,6 @@ function initStars() {
   requestAnimationFrame(draw);
 }
 initStars();
-
 let isDark = false;
 function toggleTheme() {
   isDark = !isDark;
@@ -389,7 +302,6 @@ function toggleTheme() {
 }
 if (localStorage.getItem('theme') === 'dark') toggleTheme();
 </script>
-
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyCeveXncaJYszckdflfTVWCDc0AwNilR9k",
@@ -399,22 +311,18 @@ const firebaseConfig = {
   messagingSenderId: "747179946604",
   appId: "1:747179946604:web:073d7faf7d80fb40041e49"
 };
-
 firebase.initializeApp(firebaseConfig);
-
 const vapidKey = "BBhSK3Y9aEcyvVOHMmnBEbxgIl_NtijL96UFDZW_IuulFm_YDfmYESowBezZiHUa_4QDkK6IH88IPGeGKh9OW7o";
 const auth = firebase.auth();
 const db = firebase.firestore();
-
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.error);
-
 let me = null;
 let myProfile = null;
 let activeChatId = null;
 let msgsUnsubscribe = null;
+let unreadCount = 0;
 
 function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
 function timeAgo(d) {
   if (!d) return '';
   const s = Math.floor((Date.now() - d)/1000);
@@ -423,56 +331,28 @@ function timeAgo(d) {
   if (s < 86400) return Math.floor(s/3600)+' ч';
   return Math.floor(s/86400)+' д';
 }
-
 function fmtTime(ts) {
   if (!ts) return '';
   return new Date(ts.toDate()).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
 }
 
-function getDefaultAvatar(gender) {
-  const color = '#1D9BF0';
-  if (gender === 'male') {
-    return `<svg viewBox="0 0 24 24" width="100%" height="100%" fill="${color}"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
-  } else if (gender === 'female') {
-    return `<svg viewBox="0 0 24 24" width="100%" height="100%" fill="${color}"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/><circle cx="12" cy="6" r="1.5"/></svg>`;
-  } else {
-    return `<svg viewBox="0 0 24 24" width="100%" height="100%" fill="${color}"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
-  }
-}
-
 auth.onAuthStateChanged((user) => {
-  if (user) {
-    me = user;
-    init();
-  } else {
-    window.location.href = '/login.html';
-  }
+  if (user) { me = user; init(); }
+  else { window.location.href = '/login.html'; }
 });
 
 async function init() {
   const pd = await db.collection('users').doc(me.uid).get();
-
-  if (!pd.exists) {
-    window.location.href = '/profile.html?setup=1';
-    return;
-  }
-
+  if (!pd.exists) { window.location.href = '/profile.html?setup=1'; return; }
   myProfile = pd.data();
-
-  const sidebarAv = document.getElementById('sidebar-av');
-  sidebarAv.innerHTML = getDefaultAvatar(myProfile.gender);
+  document.getElementById('sidebar-av').textContent = (myProfile.name || 'U')[0].toUpperCase();
   document.getElementById('sidebar-name').textContent = myProfile.name || '';
   document.getElementById('sidebar-handle').textContent = '@' + (myProfile.username || '');
-
   loadChats();
-
-  // Показываем кнопку уведомлений, если ещё не разрешены
   showNotificationButtonIfNeeded();
-
   db.collection('users').doc(me.uid).update({ isOnline: true }).catch(console.error);
 }
 
-// Показать кнопку "Включить уведомления" если нужно
 function showNotificationButtonIfNeeded() {
   const btn = document.getElementById('enable-notifications-btn');
   if (btn && 'Notification' in window && Notification.permission === 'default') {
@@ -480,66 +360,59 @@ function showNotificationButtonIfNeeded() {
   }
 }
 
-// Включить уведомления по клику
 async function enableNotifications() {
   const btn = document.getElementById('enable-notifications-btn');
   if (!btn) return;
-
   try {
     const permission = await Notification.requestPermission();
-    if (permission === 'granted') {
-      btn.style.display = 'none';
-      // После разрешения можно запросить FCM токен
-      requestNotificationPermission();
-    } else {
-      btn.style.display = 'none';
-    }
-  } catch (e) {
-    console.error('Ошибка при запросе уведомлений:', e);
+    btn.style.display = 'none';
+    if (permission === 'granted') requestFCMToken();
+  } catch(e) {
     btn.style.display = 'none';
   }
 }
 
-// Статус оффлайн при закрытии вкладки
+async function requestFCMToken() {
+  try {
+    await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    const registration = await navigator.serviceWorker.ready;
+    const messaging = firebase.messaging();
+    const token = await messaging.getToken({ vapidKey, serviceWorkerRegistration: registration });
+    if (token) {
+      await db.collection('users').doc(me.uid).set({ fcmToken: token }, { merge: true });
+      console.log('FCM Token сохранён');
+    }
+  } catch(e) {
+    console.error('FCM error:', e);
+  }
+}
+
 window.addEventListener('beforeunload', () => {
-  if (me) {
-    db.collection('users').doc(me.uid).update({ isOnline: false }).catch(() => {});
+  if (me) db.collection('users').doc(me.uid).update({ isOnline: false }).catch(() => {});
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    unreadCount = 0;
+    document.title = 'Costax — Сообщения';
   }
 });
 
 let chatsUnsubscribe = null;
-
 function loadChats() {
-  if (chatsUnsubscribe) {
-    chatsUnsubscribe();
-    chatsUnsubscribe = null;
-  }
-
-  const q = db.collection('chats')
-    .where('members', 'array-contains', me.uid)
-    .orderBy('lastAt', 'desc');
-
+  if (chatsUnsubscribe) { chatsUnsubscribe(); chatsUnsubscribe = null; }
+  const q = db.collection('chats').where('members', 'array-contains', me.uid).orderBy('lastAt', 'desc');
   chatsUnsubscribe = q.onSnapshot(async (snap) => {
     const list = document.getElementById('chats-list');
-
-    if (snap.empty) {
-      list.innerHTML = `<div class="empty-chats">Нет сообщений.<br>Нажми «+ Новый» чтобы написать.</div>`;
-      return;
-    }
-
+    if (snap.empty) { list.innerHTML = `<div class="empty-chats">Нет сообщений.<br>Нажми «+ Новый» чтобы написать.</div>`; return; }
     const chatMap = new Map();
-
     for (const doc of snap.docs) {
-      const chatData = { id: doc.id, ...doc.data() };
-      const el = await renderChatItem(chatData);
+      const el = await renderChatItem({ id: doc.id, ...doc.data() });
       chatMap.set(doc.id, el);
     }
-
     list.innerHTML = '';
     chatMap.forEach(el => list.appendChild(el));
-  }, (error) => {
-    console.error('Chats error:', error);
-  });
+  }, (error) => { console.error('Chats error:', error); });
 }
 
 async function renderChatItem(chat) {
@@ -549,83 +422,50 @@ async function renderChatItem(chat) {
   const div = document.createElement('div');
   div.className = 'chat-item';
   div.dataset.chatId = chat.id;
-  
-  const unreadHTML = chat.unreadCount > 0 
-    ? `<div style="width:8px;height:8px;background:#1D9BF0;border-radius:50%;margin-left:6px;flex-shrink:0;"></div>` 
-    : '';
-
-  const avatarHTML = `<div class="ci-av">${getDefaultAvatar(other.gender)}</div>`;
   div.innerHTML = `
-    ${avatarHTML}
+    <div class="ci-av">${(other.name||'U')[0].toUpperCase()}</div>
     <div class="ci-info">
       <div class="ci-name">${esc(other.name)}</div>
       <div class="ci-last">${esc(chat.lastMsg || 'Начни переписку')}</div>
     </div>
-    <div style="display:flex;align-items:center;gap:6px;">
-      <div class="ci-time">${chat.lastAt ? timeAgo(chat.lastAt.toDate()) : ''}</div>
-      ${unreadHTML}
-    </div>
-  `;
+    <div class="ci-time">${chat.lastAt ? timeAgo(chat.lastAt.toDate()) : ''}</div>`;
   div.onclick = () => openChat(chat.id, other);
   return div;
 }
 
 window.openChat = function(chatId, other) {
   activeChatId = chatId;
-
   document.getElementById('chat-empty').style.display = 'none';
-  const chatActive = document.getElementById('chat-active');
-  chatActive.style.display = 'flex';
-
-  document.getElementById('chat-av').innerHTML = getDefaultAvatar(other.gender);
+  document.getElementById('chat-active').style.display = 'flex';
+  document.getElementById('chat-av').textContent = (other.name||'U')[0].toUpperCase();
   document.getElementById('chat-name').textContent = other.name || 'Пользователь';
   document.getElementById('chat-handle').textContent = '@' + (other.username || '');
-
   const onlineDot = document.getElementById('chat-online');
-  if (onlineDot) {
-    onlineDot.style.display = other.isOnline ? 'inline-block' : 'none';
-  }
-
+  if (onlineDot) onlineDot.style.display = other.isOnline ? 'inline-block' : 'none';
   document.getElementById('chat-window').classList.add('open');
-
-  document.querySelectorAll('.chat-item').forEach(el => {
-    el.classList.toggle('active', el.dataset.chatId === chatId);
-  });
-
+  document.querySelectorAll('.chat-item').forEach(el => el.classList.toggle('active', el.dataset.chatId === chatId));
   if (msgsUnsubscribe) msgsUnsubscribe();
-
   const msgsEl = document.getElementById('chat-messages');
   msgsEl.innerHTML = '';
-
-  msgsUnsubscribe = db.collection('chats').doc(chatId)
-    .collection('messages')
-    .orderBy('ts')
-    .limitToLast(50)
-    .onSnapshot(snap => {
-      msgsEl.innerHTML = '';
-      snap.forEach(doc => {
-        const m = doc.data();
-        const isMine = m.uid === me.uid;
-        const div = document.createElement('div');
-        div.className = 'msg ' + (isMine ? 'mine' : 'theirs');
-        div.innerHTML = `
-          <div class="msg-bubble">${esc(m.text)}</div>
-          <div class="msg-time">${fmtTime(m.ts)}</div>
-        `;
-        msgsEl.appendChild(div);
-      });
-      msgsEl.scrollTop = msgsEl.scrollHeight;
-
-      if (!document.hidden && Notification.permission === 'granted') {
-        const lastMsg = snap.docs[snap.docs.length - 1]?.data();
-        if (lastMsg && lastMsg.uid !== me.uid) {
-          new Notification('Новое сообщение', {
-            body: lastMsg.text,
-            icon: '/icon-192.png'
-          });
-        }
-      }
+  msgsUnsubscribe = db.collection('chats').doc(chatId).collection('messages').orderBy('ts').limitToLast(50).onSnapshot(snap => {
+    msgsEl.innerHTML = '';
+    snap.forEach(doc => {
+      const m = doc.data();
+      const isMine = m.uid === me.uid;
+      const div = document.createElement('div');
+      div.className = 'msg ' + (isMine ? 'mine' : 'theirs');
+      div.innerHTML = `<div class="msg-bubble">${esc(m.text)}</div><div class="msg-time">${fmtTime(m.ts)}</div>`;
+      msgsEl.appendChild(div);
     });
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+    if (document.hidden) {
+      const last = snap.docs[snap.docs.length-1]?.data();
+      if (last && last.uid !== me.uid) {
+        unreadCount++;
+        document.title = `(${unreadCount}) Чат`;
+      }
+    }
+  });
 };
 
 window.sendMsg = async function() {
@@ -634,48 +474,28 @@ window.sendMsg = async function() {
   if (!text || !activeChatId) return;
   input.value = '';
   input.style.height = 'auto';
-
   const ref = db.collection('chats').doc(activeChatId);
-  await ref.collection('messages').add({
-    text,
-    uid: me.uid,
-    ts: firebase.firestore.FieldValue.serverTimestamp()
-  });
-  await ref.update({
-    lastMsg: text,
-    lastAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
-
-  // Отправляем push через backend
-  if (myProfile && myProfile.name) {
-    // TODO: Получить fcmToken собеседника
-    fetch("/api/send-push", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        token: "OTHER_USER_FCM_TOKEN",
-        title: myProfile.name,
-        body: text
-      })
-    }).catch(console.error);
-  }
+  await ref.collection('messages').add({ text, uid: me.uid, ts: firebase.firestore.FieldValue.serverTimestamp() });
+  await ref.update({ lastMsg: text, lastAt: firebase.firestore.FieldValue.serverTimestamp() });
+  // Отправить push собеседнику
+  try {
+    const chatDoc = await ref.get();
+    const otherId = chatDoc.data().members.find(id => id !== me.uid);
+    const otherDoc = await db.collection('users').doc(otherId).get();
+    const fcmToken = otherDoc.exists ? otherDoc.data().fcmToken : null;
+    if (fcmToken && myProfile) {
+      fetch('/api/send-push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: fcmToken, title: myProfile.name || 'Сообщение', body: text })
+      }).catch(console.error);
+    }
+  } catch(e) { console.error('Push error:', e); }
 };
 
-window.handleKey = function(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendMsg();
-  }
-};
-
-window.autoResize = function(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-};
-
-window.closeChatMobile = function() {
-  document.getElementById('chat-window').classList.remove('open');
-};
+window.handleKey = function(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } };
+window.autoResize = function(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; };
+window.closeChatMobile = function() { document.getElementById('chat-window').classList.remove('open'); };
 
 window.showNewChat = function() {
   document.getElementById('modal-overlay').classList.add('show');
@@ -683,10 +503,7 @@ window.showNewChat = function() {
   document.getElementById('modal-results').innerHTML = '';
   setTimeout(() => document.getElementById('modal-search').focus(), 100);
 };
-
-window.hideNewChat = function() {
-  document.getElementById('modal-overlay').classList.remove('show');
-};
+window.hideNewChat = function() { document.getElementById('modal-overlay').classList.remove('show'); };
 
 window.searchForUser = async function(val) {
   const q = val.trim().toLowerCase().replace('@', '');
@@ -694,22 +511,13 @@ window.searchForUser = async function(val) {
   res.innerHTML = '';
   if (!q || q.length < 2) return;
   const snap = await db.collection('users').where('username', '>=', q).where('username', '<=', q + '\uf8ff').limit(5).get();
-  if (snap.empty) {
-    res.innerHTML = '<div style="padding:10px;font-size:13px;color:#536471;">Пользователь не найден</div>';
-    return;
-  }
+  if (snap.empty) { res.innerHTML = '<div style="padding:10px;font-size:13px;color:#536471;">Пользователь не найден</div>'; return; }
   snap.forEach(doc => {
     if (doc.id === me.uid) return;
     const u = doc.data();
     const div = document.createElement('div');
     div.className = 'modal-user';
-    div.innerHTML = `
-      <div class="mu-av">${(u.name||'U')[0].toUpperCase()}</div>
-      <div>
-        <div class="mu-name">${esc(u.name)}</div>
-        <div class="mu-handle">@${esc(u.username)}</div>
-      </div>
-    `;
+    div.innerHTML = `<div class="mu-av">${(u.name||'U')[0].toUpperCase()}</div><div><div class="mu-name">${esc(u.name)}</div><div class="mu-handle">@${esc(u.username)}</div></div>`;
     div.onclick = () => { hideNewChat(); openChatWithUser(doc.id); };
     res.appendChild(div);
   });
@@ -721,76 +529,12 @@ window.openChatWithUser = async function(targetUid) {
   const chatRef = db.collection('chats').doc(chatId);
   const chatSnap = await chatRef.get();
   if (!chatSnap.exists) {
-    await chatRef.set({
-      members: [me.uid, targetUid],
-      lastMsg: '',
-      lastAt: firebase.firestore.FieldValue.serverTimestamp()
-  
-  // Отправляем push через backend
-  if (myProfile && myProfile.name) {
-    // TODO: Получить fcmToken собеседника
-    fetch("/api/send-push", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        token: "OTHER_USER_FCM_TOKEN",
-        title: myProfile.name,
-        body: text
-      })
-    }).catch(console.error);
-  }
-    });
+    await chatRef.set({ members: [me.uid, targetUid], lastMsg: '', lastAt: firebase.firestore.FieldValue.serverTimestamp() });
   }
   const otherSnap = await db.collection('users').doc(targetUid).get();
   const other = otherSnap.exists ? otherSnap.data() : { name: 'Пользователь', username: '' };
   openChat(chatId, other);
 };
 </script>
-
-<script>
-// === FCM Push Notifications ===
-async function requestNotificationPermission() {
-  try {
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') {
-      console.log('Уведомления отклонены');
-      return null;
-    }
-
-    await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-    const registration = await navigator.serviceWorker.ready;
-
-    const messaging = firebase.messaging();
-    const token = await messaging.getToken({ 
-      vapidKey, 
-      serviceWorkerRegistration: registration 
-    });
-
-    if (token) {
-      const user = firebase.auth().currentUser;
-      if (user) {
-        await firebase.firestore()
-          .collection('users')
-          .doc(user.uid)
-          .set({ fcmToken: token }, { merge: true });
-        console.log('FCM Token сохранён:', token);
-      }
-      return token;
-    }
-  } catch (error) {
-    console.error('Ошибка при получении FCM токена:', error);
-  }
-  return null;
-}
-
-async function sendPushNotification(fcmToken, senderName, messageText) {
-  if (!fcmToken) return;
-
-  console.log(`Отправка push: ${senderName} → "${messageText}"`);
-
-  // В реальном проекте здесь должен быть запрос на backend / Cloud Function
-}
-</script>
-
 </body>
 </html>
