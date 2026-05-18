@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Costax — Сообщения</title>
 <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1D9BF0">
 <link rel="apple-touch-icon" href="/icon-192.png">
-<meta name="theme-color" content="#1D9BF0">
-<meta name="theme-color" content="#1D9BF0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
@@ -179,12 +178,48 @@ body.dark .back-btn { color: #E7E9EA; }
 body.light .back-btn:hover { background: #E7E9EA; }
 body.dark .back-btn:hover { background: #181818; }
 
+/* Mobile Bottom Navigation */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: #000000;
+  border-top: 1px solid #2F3336;
+  z-index: 100;
+  align-items: center;
+  justify-content: space-around;
+}
+
 @media (max-width: 640px) {
   .sidebar { display: none; }
-  .chats-panel { width: 100%; min-width: unset; border-right: none; }
+  .chats-panel { width: 100%; min-width: unset; border-right: none; padding-bottom: 60px; }
   .chat-window { display: none; position: fixed; inset: 0; z-index: 50; padding-bottom: 60px; }
   .chat-window.open { display: flex; flex-direction: column; }
   .back-btn { display: flex !important; }
+  .bottom-nav { display: flex; }
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #71767B;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 600;
+  gap: 4px;
+}
+
+.bottom-nav-item.active {
+  color: #1D9BF0;
+}
+
+.bottom-nav-item i {
+  font-size: 22px;
 }
 </style>
 </head>
@@ -256,6 +291,22 @@ body.dark .back-btn:hover { background: #181818; }
       </div>
     </div>
   </div>
+</div>
+
+<!-- Mobile Bottom Navigation -->
+<div class="bottom-nav">
+  <a href="/" class="bottom-nav-item">
+    <i class="ti ti-home"></i>
+    <span>Лента</span>
+  </a>
+  <a href="/messages.html" class="bottom-nav-item active">
+    <i class="ti ti-message"></i>
+    <span>Сообщения</span>
+  </a>
+  <a href="/profile.html" class="bottom-nav-item">
+    <i class="ti ti-user"></i>
+    <span>Профиль</span>
+  </a>
 </div>
 
 <div class="modal-overlay" id="modal-overlay" onclick="hideNewChat()">
@@ -412,13 +463,22 @@ async function renderChatItem(chat) {
   const div = document.createElement('div');
   div.className = 'chat-item';
   div.dataset.chatId = chat.id;
+  
+  // Показываем синюю точку если есть непрочитанные
+  const unreadHTML = chat.unreadCount > 0 
+    ? `<div style="width:8px;height:8px;background:#1D9BF0;border-radius:50%;margin-left:6px;flex-shrink:0;"></div>` 
+    : '';
+
   div.innerHTML = `
     <div class="ci-av">${(other.name||'U')[0].toUpperCase()}</div>
     <div class="ci-info">
       <div class="ci-name">${esc(other.name)}</div>
       <div class="ci-last">${esc(chat.lastMsg || 'Начни переписку')}</div>
     </div>
-    <div class="ci-time">${chat.lastAt ? timeAgo(chat.lastAt.toDate()) : ''}</div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div class="ci-time">${chat.lastAt ? timeAgo(chat.lastAt.toDate()) : ''}</div>
+      ${unreadHTML}
+    </div>
   `;
   div.onclick = () => openChat(chat.id, other);
   return div;
