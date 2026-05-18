@@ -469,11 +469,6 @@ async function init() {
   // Показываем кнопку уведомлений, если ещё не разрешены
   showNotificationButtonIfNeeded();
 
-  // Автоматически запрашиваем FCM токен, если уведомления уже разрешены
-  if ('Notification' in window && Notification.permission === 'granted') {
-    requestNotificationPermission();
-  }
-
   db.collection('users').doc(me.uid).update({ isOnline: true }).catch(console.error);
 }
 
