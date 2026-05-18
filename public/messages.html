@@ -674,7 +674,11 @@ window.openChatWithUser = async function(targetUid) {
 
 </body>
 </html>
+
+<script>
 // === FCM Push Notifications ===
+const vapidKey = "BBhSK3Y9aEcyvVOHMmnBEbxgIl_NtijL96UFDZW_IuulFm_YDfmYESowBezZiHUa_4QDkK6IH88IPGeGKh9OW7o";
+
 async function requestNotificationPermission() {
   try {
     const permission = await Notification.requestPermission();
@@ -706,31 +710,15 @@ async function requestNotificationPermission() {
 // Вызываем при загрузке, если пользователь авторизован
 auth.onAuthStateChanged((user) => {
   if (user) {
-    // Запрашиваем разрешение на уведомления
     setTimeout(() => {
       requestNotificationPermission();
     }, 2000);
   }
 });
 
-// === Отправка Push через FCM REST API (ВНИМАНИЕ: Server Key должен храниться на сервере!) ===
+// === Отправка Push (заглушка) ===
 async function sendPushNotification(fcmToken, title, body) {
-  // В реальном проекте это должно делаться через Cloud Functions или backend
-  // Здесь заглушка для примера
   console.log('Push должен быть отправлен на токен:', fcmToken);
   console.log('Заголовок:', title, 'Текст:', body);
-  
-  // Пример REST запроса (НЕ ДЕЛАЙТЕ ТАК В ПРОДАКШЕНЕ - ключ утекёт)
-  // const serverKey = 'YOUR_SERVER_KEY';
-  // await fetch('https://fcm.googleapis.com/fcm/send', {
-  //   method: 'POST',
-  //   headers: {
-  //     'Authorization': `key=${serverKey}`,
-  //     'Content-Type': 'application/json'
-  //   },
-  //   body: JSON.stringify({
-  //     to: fcmToken,
-  //     notification: { title, body }
-  //   })
-  // });
 }
+</script>
