@@ -365,7 +365,7 @@ if (localStorage.getItem('theme') === 'dark') toggleTheme();
 
 <script>
 const firebaseConfig = {
-  apiKey: "AIzaSy...lR9k",
+  apiKey: "AIzaSyCeveXncaJYszckdflfTVWCDc0AwNilR9k",
   authDomain: "costax-aed53.firebaseapp.com",
   projectId: "costax-aed53",
   storageBucket: "costax-aed53.firebasestorage.app",
@@ -439,16 +439,13 @@ async function init() {
 
   loadChats();
 
-  // Запрашиваем разрешение на уведомления
   if ('Notification' in window && Notification.permission === 'default') {
     Notification.requestPermission();
   }
 
-  // Устанавливаем статус онлайн
   db.collection('users').doc(me.uid).update({ isOnline: true }).catch(console.error);
 }
 
-// Статус оффлайн при закрытии вкладки
 window.addEventListener('beforeunload', () => {
   if (me) {
     db.collection('users').doc(me.uid).update({ isOnline: false }).catch(() => {});
