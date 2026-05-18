@@ -1,86 +1,61 @@
 const express = require('express');
 const http = require('http');
 const path = require('path');
-const admin = require('firebase-admin');
-
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
 
-// Debug logs
-console.log('PROJECT_ID:', process.env.FIREBASE_PROJECT_ID);
-console.log('CLIENT_EMAIL:', process.env.FIREBASE_CLIENT_EMAIL);
-
-// Инициализация Firebase Admin SDK (работает и локально, и на Railway)
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n')
-    })
-  });
-}
-
-// Статика из папки public
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
+// Firebase Admin — необязательный, только если заданы переменные
+let adminMessaging = null;
+try {
+  const admin = require('firebase-admin');
+  if (!admin.apps.length && process.env.FIREBASE_PROJECT_ID) {
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n')
+      })
+    });
+    adminMessaging = admin.messaging();
+    console.log('Firebase Admin OK');
+  } else {
+    console.log('Firebase Admin — переменные не заданы, push отключены');
+  }
+} catch(e) {
+  console.warn('Firebase Admin не запустился:', e.message);
+}
+
 // Маршруты
-app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
-
-app.get('/profile', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'profile.html'));
-});
-
+app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
+app.get('/profile', (req, res) => res.sendFile(path.join(__dirname, 'public', 'profile.html')));
 app.get('/messages', (req, res) => res.sendFile(path.join(__dirname, 'public', 'messages.html')));
-
-app.get('/messages.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'messages.html'));
-});
-
-app.get('/sw.js', (req, res) => res.sendFile(path.join(__dirname, 'public', 'sw.js')));
-app.get('/manifest.json', (req, res) => res.sendFile(path.join(__dirname, 'public', 'manifest.json')));
-
 app.get('/user', (req, res) => res.sendFile(path.join(__dirname, 'public', 'user.html')));
-app.get('/user.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'user.html')));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// === FCM Push Endpoint (через Firebase Admin SDK) ===
+// Push endpoint
 app.post('/api/send-push', async (req, res) => {
+  if (!adminMessaging) {
+    return res.status(503).json({ error: 'Push не настроен' });
+  }
   const { token, title, body } = req.body;
-
   if (!token || !title || !body) {
     return res.status(400).json({ error: 'token, title и body обязательны' });
   }
-
   try {
-    const message = {
-      notification: {
-        title: title,
-        body: body,
-      },
-      data: {
-        click_action: '/messages.html',
-      },
-      token: token,
-    };
-
-    const response = await admin.messaging().send(message);
-    console.log('Push отправлен успешно:', response);
-
+    const response = await adminMessaging.send({
+      notification: { title, body },
+      data: { click_action: '/messages.html' },
+      token
+    });
     res.json({ success: true, messageId: response });
-  } catch (error) {
-    console.error('Ошибка отправки push:', error);
-    res.status(500).json({ error: 'Failed to send push notification' });
+  } catch(e) {
+    console.error('Push error:', e.message);
+    res.status(500).json({ error: e.message });
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`Сервер запущен на порту ${PORT}`);
-});
+server.listen(PORT, () => console.log(`Сервер запущен: http://localhost:${PORT}`));
