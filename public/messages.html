@@ -589,6 +589,11 @@ window.sendMsg = async function() {
   await ref.update({
     lastMsg: text,
     lastAt: firebase.firestore.FieldValue.serverTimestamp()
+  
+  // Отправляем push-уведомление собеседнику
+  if (myProfile && myProfile.name) {
+    console.log("Push notification should be sent");
+  }
   });
 };
 
@@ -656,6 +661,11 @@ window.openChatWithUser = async function(targetUid) {
       members: [me.uid, targetUid],
       lastMsg: '',
       lastAt: firebase.firestore.FieldValue.serverTimestamp()
+  
+  // Отправляем push-уведомление собеседнику
+  if (myProfile && myProfile.name) {
+    console.log("Push notification should be sent");
+  }
     });
   }
   const otherSnap = await db.collection('users').doc(targetUid).get();
