@@ -26,9 +26,10 @@ self.addEventListener('fetch', e => {
 // Push Notification Handler
 self.addEventListener('push', event => {
   const data = event.data.json();
-  const title = data.title || 'Новое сообщение';
+  const title = data.notification?.title || data.title || 'Новое сообщение';
+  const body = data.notification?.body || data.body || '';
   const options = {
-    body: data.body || '',
+    body,
     icon: '/icon-180.png',
     badge: '/icon-180.png',
     data: data
