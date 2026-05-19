@@ -722,14 +722,39 @@ onAuthStateChanged(auth, async user => {
   updateSidebar();
   document.getElementById('app').style.display = 'flex';
 
-  updateDoc(doc(db,'users',me.uid), { isOnline: true }).catch(() => {});
+  startHeartbeat();
   watchUnreadBadge();
   showNotificationButtonIfNeeded();
   if ('Notification' in window && Notification.permission === 'granted') setTimeout(requestFCMToken, 1500);
   route();
 });
 
+let heartbeatTimer = null;
+function startHeartbeat() {
+  if (heartbeatTimer) clearInterval(heartbeatTimer);
+  const beat = () => updateDoc(doc(db,'users',me.uid), { isOnline: true, lastSeen: serverTimestamp() }).catch(() => {});
+  beat();
+  heartbeatTimer = setInterval(beat, 30000);
+}
+
+function playNotifSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.setValueAtTime(1100, ctx.currentTime + 0.08);
+    gain.gain.setValueAtTime(0.25, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.25);
+  } catch(e) {}
+}
+
 window.addEventListener('beforeunload', () => {
+  if (heartbeatTimer) clearInterval(heartbeatTimer);
   if (me) updateDoc(doc(db,'users',me.uid), { isOnline: false }).catch(() => {});
 });
 
@@ -1145,7 +1170,8 @@ window.openChat = function(chatId, other, otherId) {
   if (nameEl) nameEl.textContent = other.name||'Пользователь';
   const originalHandle = '@'+(other.username||'');
   if (handleEl) handleEl.textContent = originalHandle;
-  if (onlineDot) onlineDot.style.display = other.isOnline ? 'inline-block' : 'none';
+  const isOnlineNow = other.isOnline && other.lastSeen && (Date.now() - other.lastSeen.toDate().getTime()) < 65000;
+  if (onlineDot) onlineDot.style.display = isOnlineNow ? 'inline-block' : 'none';
   document.getElementById('chat-window')?.classList.add('open');
   document.querySelectorAll('.chat-item').forEach(el => el.classList.toggle('active', el.dataset.chatId === chatId));
   updateDoc(doc(db,'chats',chatId), { [`unread.${me.uid}`]: 0 }).catch(() => {});
@@ -1173,11 +1199,18 @@ window.openChat = function(chatId, other, otherId) {
   if (msgsUnsub) msgsUnsub();
   const msgsEl = document.getElementById('chat-messages');
   if (msgsEl) msgsEl.innerHTML = '';
+  let prevMsgCount = 0;
   msgsUnsub = onSnapshot(
     query(collection(db,'chats',chatId,'messages'), orderBy('ts'), limitToLast(50)),
     snap => {
       const el = document.getElementById('chat-messages');
       if (!el) return;
+      const newCount = snap.size;
+      if (newCount > prevMsgCount && prevMsgCount > 0) {
+        const last = snap.docs[snap.docs.length - 1]?.data();
+        if (last && last.uid !== me.uid) playNotifSound();
+      }
+      prevMsgCount = newCount;
       el.innerHTML = '';
       snap.forEach(d => el.appendChild(renderMsg(d.id, d.data(), () => otherLastRead)));
       el.scrollTop = el.scrollHeight;
