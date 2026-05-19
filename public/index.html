@@ -710,7 +710,6 @@ onAuthStateChanged(auth, async user => {
 });
 
 window.addEventListener('beforeunload', () => {
-  if (me) getDoc; // keep for tree-shaking, just update offline
   if (me) updateDoc(doc(db,'users',me.uid), { isOnline: false }).catch(() => {});
 });
 
@@ -1047,7 +1046,7 @@ function loadChats(autoOpenUid) {
 }
 
 async function renderChatItem(chat) {
-  const otherId = chat.members.find(id => id !== me.uid);
+  const otherId = chat.members?.find(id => id !== me.uid);
   const other = await getUser(otherId);
   const unread = (chat.unread && chat.unread[me.uid]) || 0;
   const div = document.createElement('div');
@@ -1140,7 +1139,7 @@ window.sendMsg = async function() {
   await addDoc(collection(db,'chats',activeChatId,'messages'), { text, uid:me.uid, ts:serverTimestamp() });
   try {
     const chatDoc = await getDoc(ref);
-    const otherId = chatDoc.data().members.find(id => id !== me.uid);
+    const otherId = chatDoc.data()?.members?.find(id => id !== me.uid);
     await updateDoc(ref, { lastMsg:text, lastAt:serverTimestamp(), [`unread.${otherId}`]: increment(1) });
     const otherDoc = await getDoc(doc(db,'users',otherId));
     const fcmToken = otherDoc.exists() ? otherDoc.data().fcmToken : null;
