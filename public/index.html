@@ -1246,9 +1246,9 @@ function renderProfile() {
         <div class="profile-header-block">
           <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
           <div class="profile-top">
-            <div class="profile-av" onclick="document.getElementById('avatar-input').click()">
+            <label for="avatar-input" class="profile-av" style="cursor:pointer">
               ${p.photoURL ? `<img src="${p.photoURL}" alt="">` : init}
-            </div>
+            </label>
             <div class="btn-actions">
               <button class="btn-edit-prof" onclick="toggleEdit()">Редактировать</button>
               <button class="btn-logout" onclick="doLogout()">Выйти</button>
