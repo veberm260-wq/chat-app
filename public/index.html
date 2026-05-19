@@ -245,6 +245,7 @@ body.dark .ci-time{color:#71767B}
 body.light .empty-chats{color:#536471}
 body.dark .empty-chats{color:#71767B}
 .chat-window{flex:1;display:flex;flex-direction:column;transition:background .3s}
+#chat-active{min-height:0}
 body.light .chat-window{background:#fff}
 body.dark .chat-window{background:#000}
 .chat-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-size:15px;font-weight:600;transition:color .3s}
@@ -598,7 +599,7 @@ window.switchTab = function(tab) {
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, doc, getDoc, getDocs, deleteDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where, limit, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, doc, getDoc, getDocs, deleteDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where, limit, limitToLast, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { increment, deleteField } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -1100,7 +1101,7 @@ window.openChat = function(chatId, other, otherId) {
   const msgsEl = document.getElementById('chat-messages');
   if (msgsEl) msgsEl.innerHTML = '';
   msgsUnsub = onSnapshot(
-    query(collection(db,'chats',chatId,'messages'), orderBy('ts'), limit(50)),
+    query(collection(db,'chats',chatId,'messages'), orderBy('ts'), limitToLast(50)),
     snap => {
       const el = document.getElementById('chat-messages');
       if (!el) return;
