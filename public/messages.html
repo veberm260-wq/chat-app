@@ -173,13 +173,12 @@ body.light .back-btn { color: #0F1419; }
 body.dark .back-btn { color: #E7E9EA; }
 body.light .back-btn:hover { background: #E7E9EA; }
 body.dark .back-btn:hover { background: #181818; }
-.bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #000000; border-top: 1px solid #2F3336; z-index: 100; align-items: center; justify-content: space-around; padding-top: 8px; padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+.bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: #000000; border-top: 1px solid #2F3336; z-index: 100; align-items: center; justify-content: space-around; }
 @media (max-width: 640px) {
   .sidebar { display: none; }
-  .chats-panel { width: 100%; min-width: unset; border-right: none; padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
-  .chat-window { display: none; position: fixed; inset: 0; z-index: 150; }
+  .chats-panel { width: 100%; min-width: unset; border-right: none; padding-bottom: 60px; }
+  .chat-window { display: none; position: fixed; inset: 0; z-index: 50; padding-bottom: 60px; }
   .chat-window.open { display: flex; flex-direction: column; }
-  .chat-window.open .chat-input-wrap { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
   .back-btn { display: flex !important; }
   .bottom-nav { display: flex; }
 }
