@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Costax — Сообщения</title>
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -17,7 +17,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Nunito', -apple-system, sans-serif; height: 100vh; display: flex; overflow: hidden; transition: background 0.3s, color 0.3s; }
+body { font-family: 'Nunito', -apple-system, sans-serif; height: 100vh; height: 100dvh; display: flex; overflow: hidden; transition: background 0.3s, color 0.3s; }
 body.light { background: #FFFFFF; color: #0F1419; }
 body.dark { background: #000000; color: #E7E9EA; }
 #stars-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; display: none; }
@@ -173,12 +173,13 @@ body.light .back-btn { color: #0F1419; }
 body.dark .back-btn { color: #E7E9EA; }
 body.light .back-btn:hover { background: #E7E9EA; }
 body.dark .back-btn:hover { background: #181818; }
-.bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: #000000; border-top: 1px solid #2F3336; z-index: 100; align-items: center; justify-content: space-around; }
+.bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #000000; border-top: 1px solid #2F3336; z-index: 100; align-items: center; justify-content: space-around; padding-top: 8px; padding-bottom: max(8px, env(safe-area-inset-bottom)); }
 @media (max-width: 640px) {
   .sidebar { display: none; }
-  .chats-panel { width: 100%; min-width: unset; border-right: none; padding-bottom: 60px; }
-  .chat-window { display: none; position: fixed; inset: 0; z-index: 50; padding-bottom: 60px; }
+  .chats-panel { width: 100%; min-width: unset; border-right: none; padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
+  .chat-window { display: none; position: fixed; inset: 0; z-index: 50; }
   .chat-window.open { display: flex; flex-direction: column; }
+  .chat-window.open .chat-input-wrap { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
   .back-btn { display: flex !important; }
   .bottom-nav { display: flex; }
 }
@@ -267,6 +268,7 @@ body.dark .back-btn:hover { background: #181818; }
   </div>
 </div>
 <script>
+let starsRunning = false;
 function initStars() {
   const canvas = document.getElementById('stars-canvas');
   const ctx = canvas.getContext('2d');
@@ -277,6 +279,7 @@ function initStars() {
     for (let i = 0; i < 200; i++) stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*1.2+0.2, speed: 0.003+Math.random()*0.008, phase: Math.random()*Math.PI*2 });
   }
   function draw(t) {
+    if (!document.body.classList.contains('dark')) { starsRunning = false; return; }
     ctx.clearRect(0,0,canvas.width,canvas.height);
     stars.forEach(s => {
       const a = 0.15 + 0.65*(0.5+0.5*Math.sin(t*s.speed+s.phase));
@@ -285,9 +288,13 @@ function initStars() {
     });
     requestAnimationFrame(draw);
   }
+  window._startStars = function() {
+    if (starsRunning) return;
+    starsRunning = true;
+    requestAnimationFrame(draw);
+  };
   resize(); createStars();
   window.addEventListener('resize', () => { resize(); createStars(); });
-  requestAnimationFrame(draw);
 }
 initStars();
 let isDark = false;
@@ -299,8 +306,10 @@ function toggleTheme() {
   document.getElementById('toggle-pill').style.background = isDark ? '#1D9BF0' : '#E7E9EA';
   document.getElementById('toggle-dot').style.left = isDark ? '20px' : '2px';
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  if (isDark) window._startStars && window._startStars();
 }
 if (localStorage.getItem('theme') === 'dark') toggleTheme();
+else window._startStars = null;
 </script>
 <script>
 const firebaseConfig = {
@@ -321,6 +330,14 @@ let myProfile = null;
 let activeChatId = null;
 let msgsUnsubscribe = null;
 let unreadCount = 0;
+const userCache = new Map();
+async function getUser(uid) {
+  if (userCache.has(uid)) return userCache.get(uid);
+  const od = await db.collection('users').doc(uid).get();
+  const data = od.exists ? od.data() : { name: 'Пользователь', username: '' };
+  userCache.set(uid, data);
+  return data;
+}
 
 function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function timeAgo(d) {
@@ -418,8 +435,7 @@ function loadChats() {
 
 async function renderChatItem(chat) {
   const otherId = chat.members.find(id => id !== me.uid);
-  const od = await db.collection('users').doc(otherId).get();
-  const other = od.exists ? od.data() : { name: 'Пользователь', username: '' };
+  const other = await getUser(otherId);
   const div = document.createElement('div');
   div.className = 'chat-item';
   div.dataset.chatId = chat.id;

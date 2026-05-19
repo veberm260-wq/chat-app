@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Costax</title>
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -17,6 +17,7 @@
 body {
   font-family: 'Nunito', -apple-system, sans-serif;
   height: 100vh;
+  height: 100dvh;
   display: flex;
   overflow: hidden;
   transition: background 0.3s, color 0.3s;
@@ -314,6 +315,7 @@ body.dark .mob-item { color: #71767B; }
 </nav>
 
 <script>
+let starsRunning = false;
 function initStars() {
   const canvas = document.getElementById('stars-canvas');
   const ctx = canvas.getContext('2d');
@@ -326,6 +328,7 @@ function initStars() {
     }
   }
   function draw(t) {
+    if (!document.body.classList.contains('dark')) { starsRunning = false; return; }
     ctx.clearRect(0,0,canvas.width,canvas.height);
     stars.forEach(s => {
       const a = 0.15 + 0.65*(0.5+0.5*Math.sin(t*s.speed+s.phase));
@@ -334,9 +337,13 @@ function initStars() {
     });
     requestAnimationFrame(draw);
   }
+  window._startStars = function() {
+    if (starsRunning) return;
+    starsRunning = true;
+    requestAnimationFrame(draw);
+  };
   resize(); createStars();
   window.addEventListener('resize', () => { resize(); createStars(); });
-  requestAnimationFrame(draw);
 }
 initStars();
 
@@ -349,6 +356,7 @@ function toggleTheme() {
   document.getElementById('toggle-pill').style.background = isDark ? '#1D9BF0' : '#E7E9EA';
   document.getElementById('toggle-dot').style.left = isDark ? '20px' : '2px';
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  if (isDark) window._startStars && window._startStars();
 }
 if (localStorage.getItem('theme') === 'dark') toggleTheme();
 </script>
@@ -371,6 +379,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 let me = null, myProfile = null;
+const commentUnsubs = {};
 
 // Twitter-style verified badge SVG
 const badgeSvg = `<span class="verified"><svg viewBox="0 0 24 24" aria-label="Подтверждённый аккаунт"><g><path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z" fill="#1D9BF0"/></g></svg></span>`;
@@ -391,7 +400,7 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 function loadFeed() {
-  const q = query(collection(db,'posts'), orderBy('createdAt','desc'));
+  const q = query(collection(db,'posts'), orderBy('createdAt','desc'), limit(50));
   onSnapshot(q, snap => {
     document.getElementById('post-count').textContent = snap.size + ' постов';
     const list = document.getElementById('posts-list');
@@ -468,8 +477,9 @@ window.toggleComments = async function(id) {
 };
 
 async function loadComments(postId) {
+  if (commentUnsubs[postId]) return;
   const q = query(collection(db,'posts',postId,'comments'), orderBy('createdAt','asc'));
-  onSnapshot(q, snap => {
+  commentUnsubs[postId] = onSnapshot(q, snap => {
     const list = document.getElementById('comments-list-'+postId);
     if (!list) return;
     list.innerHTML = '';
