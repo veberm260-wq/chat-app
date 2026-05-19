@@ -309,7 +309,7 @@ body.dark .mob-item { color: #71767B; }
 <nav class="mob-nav">
   <div class="mob-nav-inner">
     <a class="mob-item active" href="/"><i class="ti ti-home"></i>Лента</a>
-    <a class="mob-item" href="/messages.html"><i class="ti ti-message"></i>Чаты</a>
+    <a class="mob-item" href="/messages.html"><span style="position:relative"><i class="ti ti-message"></i><span id="nav-unread-badge" style="display:none;position:absolute;top:-2px;right:-6px;background:#1D9BF0;color:white;border-radius:9999px;font-size:9px;font-weight:800;padding:1px 4px;min-width:14px;text-align:center;line-height:14px;"></span></span>Чаты</a>
     <a class="mob-item" href="/profile.html"><i class="ti ti-user"></i>Профиль</a>
   </div>
 </nav>
@@ -384,9 +384,20 @@ const commentUnsubs = {};
 // Twitter-style verified badge SVG
 const badgeSvg = `<span class="verified"><svg viewBox="0 0 24 24" aria-label="Подтверждённый аккаунт"><g><path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36-6.2 6.77z" fill="#1D9BF0"/></g></svg></span>`;
 
+function watchUnreadBadge(uid) {
+  const q = query(collection(db,'chats'), where('members','array-contains',uid));
+  onSnapshot(q, snap => {
+    let total = 0;
+    snap.forEach(d => { total += (d.data().unread && d.data().unread[uid]) || 0; });
+    const badge = document.getElementById('nav-unread-badge');
+    if (badge) { badge.textContent = total > 99 ? '99+' : total; badge.style.display = total > 0 ? 'block' : 'none'; }
+  });
+}
+
 onAuthStateChanged(auth, async (user) => {
   if (!user) { window.location.href = '/login'; return; }
   me = user;
+  watchUnreadBadge(user.uid);
   const pd = await getDoc(doc(db,'users',user.uid));
   if (!pd.exists()) { window.location.href = '/profile.html?setup=1'; return; }
   myProfile = pd.data();
@@ -581,6 +592,7 @@ function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'
 </script>
 <script>
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+
 </script>
 </body>
 </html>
