@@ -263,7 +263,7 @@ body.dark .ch-name{color:#E7E9EA}
 body.light .ch-handle{color:#536471}
 body.dark .ch-handle{color:#71767B}
 .chat-messages{flex:1;min-height:0;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px}
-.msg{max-width:70%}
+.msg{max-width:70%;position:relative}
 .msg.mine{align-self:flex-end}
 .msg.theirs{align-self:flex-start}
 .msg-bubble{padding:10px 14px;border-radius:18px;font-size:14px;font-weight:500;line-height:1.5;word-break:break-word}
@@ -271,10 +271,25 @@ body.dark .ch-handle{color:#71767B}
 .msg.theirs .msg-bubble{border-bottom-left-radius:4px;transition:background .3s,color .3s}
 body.light .msg.theirs .msg-bubble{background:#EFF3F4;color:#0F1419}
 body.dark .msg.theirs .msg-bubble{background:#202327;color:#E7E9EA}
-.msg-time{font-size:11px;margin-top:3px;font-weight:600;transition:color .3s}
+.msg-time{font-size:11px;margin-top:3px;font-weight:600;display:flex;align-items:center;gap:3px;transition:color .3s}
 body.light .msg-time{color:#536471}
 body.dark .msg-time{color:#71767B}
-.msg.mine .msg-time{text-align:right}
+.msg.mine .msg-time{justify-content:flex-end}
+.msg-status{font-size:11px}
+.msg-status.read{color:#1D9BF0}
+.msg-status.sent{color:#71767B}
+.msg-reactions{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.r-pill{border-radius:9999px;padding:2px 8px;font-size:13px;cursor:pointer;border:1px solid;display:inline-flex;align-items:center;gap:3px;transition:all .15s}
+body.light .r-pill{background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.1);color:#0F1419}
+body.dark .r-pill{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:#E7E9EA}
+.r-pill.active{background:rgba(29,155,240,.2);border-color:rgba(29,155,240,.5)}
+.msg-menu{position:absolute;bottom:calc(100% + 6px);background:#1E1E1E;border-radius:14px;display:flex;align-items:center;gap:2px;padding:8px 10px;z-index:50;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.msg.mine .msg-menu{right:0}
+.msg.theirs .msg-menu{left:0}
+.msg-menu .e-btn{font-size:22px;cursor:pointer;padding:4px;border-radius:8px;border:none;background:none;line-height:1}
+.msg-menu .e-btn:hover{background:rgba(255,255,255,.1)}
+.msg-menu .d-btn{font-size:16px;cursor:pointer;padding:4px 6px;border-radius:8px;border:none;background:none;color:#F4212E;margin-left:4px;border-left:1px solid rgba(255,255,255,.15)}
+.msg-menu .d-btn:hover{background:rgba(244,33,46,.15)}
 .chat-input-wrap{padding:12px 16px;display:flex;gap:10px;align-items:flex-end;flex-shrink:0;transition:all .3s}
 body.light .chat-input-wrap{border-top:1px solid #EFF3F4;background:#fff}
 body.dark .chat-input-wrap{border-top:1px solid #2F3336;background:#000}
@@ -1094,8 +1109,11 @@ async function renderChatItem(chat) {
   const div = document.createElement('div');
   div.className = 'chat-item';
   div.dataset.chatId = chat.id;
+  const ciAvContent = other.photoURL
+    ? `<img src="${other.photoURL}" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:50%">`
+    : (other.name||'U')[0].toUpperCase();
   div.innerHTML = `
-    <div class="ci-av">${(other.name||'U')[0].toUpperCase()}</div>
+    <div class="ci-av">${ciAvContent}</div>
     <div class="ci-info">
       <div class="ci-name" style="font-weight:${unread>0?800:700}">${esc(other.name)}</div>
       <div class="ci-last" style="font-weight:${unread>0?700:500}">${esc(chat.lastMsg||'Начни переписку')}</div>
@@ -1118,7 +1136,9 @@ window.openChat = function(chatId, other, otherId) {
   const nameEl = document.getElementById('chat-name');
   const handleEl = document.getElementById('chat-handle');
   const onlineDot = document.getElementById('chat-online');
-  if (avEl) avEl.textContent = (other.name||'U')[0].toUpperCase();
+  if (avEl) avEl.innerHTML = other.photoURL
+    ? `<img src="${other.photoURL}" alt="" style="width:36px;height:36px;object-fit:cover;border-radius:50%">`
+    : (other.name||'U')[0].toUpperCase();
   if (nameEl) nameEl.textContent = other.name||'Пользователь';
   const originalHandle = '@'+(other.username||'');
   if (handleEl) handleEl.textContent = originalHandle;
@@ -1127,6 +1147,7 @@ window.openChat = function(chatId, other, otherId) {
   document.querySelectorAll('.chat-item').forEach(el => el.classList.toggle('active', el.dataset.chatId === chatId));
   updateDoc(doc(db,'chats',chatId), { [`unread.${me.uid}`]: 0 }).catch(() => {});
 
+  let otherLastRead = null;
   if (typingUnsub) { typingUnsub(); typingUnsub = null; }
   typingUnsub = onSnapshot(doc(db,'chats',chatId), snap => {
     const data = snap.data();
@@ -1135,7 +1156,16 @@ window.openChat = function(chatId, other, otherId) {
       handleEl.textContent = isTyping ? 'Печатает...' : originalHandle;
       handleEl.style.color = isTyping ? '#1D9BF0' : '';
     }
+    otherLastRead = data?.lastRead?.[otherId] || null;
+    document.querySelectorAll('.msg.mine .msg-status').forEach(el => {
+      const msgTs = el.dataset.ts ? new Date(Number(el.dataset.ts)) : null;
+      const isRead = otherLastRead && msgTs && msgTs <= otherLastRead.toDate();
+      el.textContent = isRead ? '✓✓' : '✓';
+      el.className = 'msg-status ' + (isRead ? 'read' : 'sent');
+    });
   });
+
+  updateDoc(doc(db,'chats',chatId), { [`lastRead.${me.uid}`]: serverTimestamp() }).catch(() => {});
 
   if (msgsUnsub) msgsUnsub();
   const msgsEl = document.getElementById('chat-messages');
@@ -1146,17 +1176,75 @@ window.openChat = function(chatId, other, otherId) {
       const el = document.getElementById('chat-messages');
       if (!el) return;
       el.innerHTML = '';
-      snap.forEach(d => {
-        const m = d.data();
-        const isMine = m.uid === me.uid;
-        const div = document.createElement('div');
-        div.className = 'msg '+(isMine?'mine':'theirs');
-        div.innerHTML = `<div class="msg-bubble">${esc(m.text)}</div><div class="msg-time">${fmtTime(m.ts)}</div>`;
-        el.appendChild(div);
-      });
+      snap.forEach(d => el.appendChild(renderMsg(d.id, d.data(), () => otherLastRead)));
       el.scrollTop = el.scrollHeight;
     }
   );
+};
+
+const EMOJIS = ['👍','❤️','😂','😮','😢','🔥'];
+
+function renderMsg(id, data, getOtherLastRead) {
+  const isMine = data.uid === me.uid;
+  const div = document.createElement('div');
+  div.className = 'msg '+(isMine?'mine':'theirs');
+
+  const otherLastRead = getOtherLastRead();
+  const msgTs = data.ts ? data.ts.toDate() : null;
+  const isRead = isMine && otherLastRead && msgTs && msgTs <= otherLastRead.toDate();
+  const statusHtml = isMine
+    ? `<span class="msg-status ${isRead?'read':'sent'}" data-ts="${msgTs?msgTs.getTime():''}">${isRead?'✓✓':'✓'}</span>`
+    : '';
+
+  const reactions = data.reactions || {};
+  const reactHtml = Object.entries(reactions)
+    .filter(([,uids]) => uids.length > 0)
+    .map(([emoji,uids]) => {
+      const active = uids.includes(me.uid) ? 'active' : '';
+      return `<span class="r-pill ${active}" onclick="toggleReaction('${id}','${emoji}')">${emoji} ${uids.length}</span>`;
+    }).join('');
+
+  div.innerHTML = `
+    <div class="msg-bubble">${esc(data.text)}</div>
+    <div class="msg-time">${fmtTime(data.ts)}${statusHtml}</div>
+    ${reactHtml ? `<div class="msg-reactions">${reactHtml}</div>` : ''}`;
+
+  addLongPress(div, id, isMine);
+  return div;
+}
+
+function addLongPress(el, msgId, isMine) {
+  let timer;
+  el.addEventListener('touchstart', () => { timer = setTimeout(() => showMsgMenu(msgId, isMine, el), 600); }, { passive: true });
+  el.addEventListener('touchend', () => clearTimeout(timer));
+  el.addEventListener('touchmove', () => clearTimeout(timer));
+  el.addEventListener('contextmenu', e => { e.preventDefault(); showMsgMenu(msgId, isMine, el); });
+}
+
+function showMsgMenu(msgId, isMine, el) {
+  document.querySelectorAll('.msg-menu').forEach(m => m.remove());
+  const menu = document.createElement('div');
+  menu.className = 'msg-menu';
+  menu.innerHTML = EMOJIS.map(e =>
+    `<button class="e-btn" onclick="toggleReaction('${msgId}','${e}');this.closest('.msg-menu').remove()">${e}</button>`
+  ).join('') + (isMine ? `<button class="d-btn" onclick="deleteMsg('${msgId}');this.closest('.msg-menu').remove()">🗑</button>` : '');
+  el.style.position = 'relative';
+  el.appendChild(menu);
+  setTimeout(() => document.addEventListener('click', () => menu.remove(), { once: true }), 100);
+}
+
+window.toggleReaction = async function(msgId, emoji) {
+  if (!activeChatId || !me) return;
+  const ref = doc(db,'chats',activeChatId,'messages',msgId);
+  const snap = await getDoc(ref);
+  const uids = snap.data()?.reactions?.[emoji] || [];
+  if (uids.includes(me.uid)) await updateDoc(ref, { [`reactions.${emoji}`]: arrayRemove(me.uid) });
+  else await updateDoc(ref, { [`reactions.${emoji}`]: arrayUnion(me.uid) });
+};
+
+window.deleteMsg = async function(msgId) {
+  if (!activeChatId) return;
+  await deleteDoc(doc(db,'chats',activeChatId,'messages',msgId));
 };
 
 window.openChatWithUser = async function(targetUid) {
