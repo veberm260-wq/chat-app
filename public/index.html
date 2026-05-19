@@ -1038,7 +1038,7 @@ function loadChats(autoOpenUid) {
     const chatMap = new Map();
     for (const d of snap.docs) {
       const el = await renderChatItem({ id:d.id, ...d.data() });
-      chatMap.set(d.id, el);
+      if (el) chatMap.set(d.id, el);
     }
     list.innerHTML = '';
     chatMap.forEach(el => list.appendChild(el));
@@ -1046,7 +1046,8 @@ function loadChats(autoOpenUid) {
 }
 
 async function renderChatItem(chat) {
-  const otherId = chat.members?.find(id => id !== me.uid);
+  const otherId = (chat.members || []).find(id => id !== me.uid);
+  if (!otherId) return null;
   const other = await getUser(otherId);
   const unread = (chat.unread && chat.unread[me.uid]) || 0;
   const div = document.createElement('div');
