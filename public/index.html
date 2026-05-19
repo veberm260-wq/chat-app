@@ -449,7 +449,7 @@ body.dark .btn-main{background:#E7E9EA;color:#0F1419}
   .profile-col{padding-bottom:60px}
   .chats-panel{width:100%;min-width:unset;border-right:none;padding-bottom:60px}
   .chat-window{display:none!important}
-  .chat-window.open{display:flex!important;position:fixed;top:0;left:0;right:0;bottom:calc(56px + max(8px,env(safe-area-inset-bottom)));z-index:150;flex-direction:column}
+  .chat-window.open{display:flex!important;position:fixed;top:0;left:0;right:0;bottom:calc(56px + max(8px,env(safe-area-inset-bottom)));z-index:150;flex-direction:column;overflow:hidden}
   .chat-back-btn{display:flex!important}
 }
 </style>
@@ -705,7 +705,7 @@ onAuthStateChanged(auth, async user => {
   updateDoc(doc(db,'users',me.uid), { isOnline: true }).catch(() => {});
   watchUnreadBadge();
   showNotificationButtonIfNeeded();
-  if ('Notification' in window && Notification.permission === 'granted') setTimeout(requestFCMToken, 2000);
+  if ('Notification' in window && Notification.permission === 'granted') setTimeout(requestFCMToken, 1500);
   route();
 });
 
@@ -752,10 +752,14 @@ async function requestFCMToken() {
   try {
     const { getMessaging, getToken } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js");
     const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    await navigator.serviceWorker.ready;
     const messaging = getMessaging(app);
     const token = await getToken(messaging, { vapidKey, serviceWorkerRegistration: registration });
-    if (token) await updateDoc(doc(db,'users',me.uid), { fcmToken: token });
-  } catch(e) { console.error('FCM:', e); }
+    if (token) {
+      await updateDoc(doc(db,'users',me.uid), { fcmToken: token });
+      console.log('FCM ok:', token.slice(0,20));
+    }
+  } catch(e) { console.error('FCM error:', e); }
 }
 
 // ── LOGIN ACTIONS ──
