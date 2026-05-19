@@ -10,7 +10,7 @@
 <meta name="theme-color" content="#1D9BF0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/tabler-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Nunito',-apple-system,sans-serif;height:100vh;height:100dvh;overflow:hidden;transition:background .3s,color .3s}
@@ -448,8 +448,8 @@ body.dark .btn-main{background:#E7E9EA;color:#0F1419}
   .feed-col{border-right:none;padding-bottom:60px}
   .profile-col{padding-bottom:60px}
   .chats-panel{width:100%;min-width:unset;border-right:none;padding-bottom:60px}
-  .chat-window{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:150;flex-direction:column}
-  .chat-window.open{display:flex}
+  .chat-window{display:none!important}
+  .chat-window.open{display:flex!important;position:fixed;top:0;left:0;right:0;bottom:0;z-index:300;flex-direction:column}
   .chat-window.open .chat-input-wrap{padding-bottom:max(16px,env(safe-area-inset-bottom))}
   .chat-back-btn{display:flex!important}
 }
