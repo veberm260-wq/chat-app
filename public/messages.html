@@ -12,10 +12,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/tabler-icons.min.css">
 <link rel="stylesheet" href="/shared.css">
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
 <style>
 body { height: 100vh; height: 100dvh; display: flex; overflow: hidden; }
 .main { flex: 1; display: flex; overflow: hidden; position: relative; z-index: 1; }
@@ -230,7 +226,14 @@ body.dark .modal-close { border: 1.5px solid #536471; color: #E7E9EA; }
     <button class="modal-close" onclick="hideNewChat()">Отмена</button>
   </div>
 </div>
-<script>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, addDoc, getDocs,
+         onSnapshot, query, where, orderBy, limitToLast, endBefore, limit,
+         serverTimestamp, increment, deleteField } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getMessaging, getToken } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
+
 const firebaseConfig = {
   apiKey: "AIzaSyCeveXncaJYszckdflfTVWCDc0AwNilR9k",
   authDomain: "costax-aed53.firebaseapp.com",
@@ -239,107 +242,84 @@ const firebaseConfig = {
   messagingSenderId: "747179946604",
   appId: "1:747179946604:web:073d7faf7d80fb40041e49"
 };
-firebase.initializeApp(firebaseConfig);
 const vapidKey = "BBhSK3Y9aEcyvVOHMmnBEbxgIl_NtijL96UFDZW_IuulFm_YDfmYESowBezZiHUa_4QDkK6IH88IPGeGKh9OW7o";
-const auth = firebase.auth();
-const db = firebase.firestore();
-auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.error);
-let me = null;
-let myProfile = null;
-let activeChatId = null;
-let msgsUnsubscribe = null;
-let typingUnsubscribe = null;
-let typingTimeout = null;
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db  = getFirestore(app);
+setPersistence(auth, browserLocalPersistence).catch(console.error);
+
+let me = null, myProfile = null, activeChatId = null;
+let msgsUnsubscribe = null, typingUnsubscribe = null, typingTimeout = null;
 let unreadCount = 0;
 const userCache = new Map();
+
 async function getUser(uid) {
   if (userCache.has(uid)) return userCache.get(uid);
-  const od = await db.collection('users').doc(uid).get();
-  const data = od.exists ? od.data() : { name: 'Пользователь', username: '' };
+  const snap = await getDoc(doc(db, 'users', uid));
+  const data = snap.exists ? snap.data() : { name: '\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c', username: '' };
   userCache.set(uid, data);
   return data;
 }
-
-function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function timeAgo(d) {
   if (!d) return '';
-  const s = Math.floor((Date.now() - d)/1000);
-  if (s < 60) return 'только что';
-  if (s < 3600) return Math.floor(s/60)+' мин';
-  if (s < 86400) return Math.floor(s/3600)+' ч';
-  return Math.floor(s/86400)+' д';
+  const s = Math.floor((Date.now()-d)/1000);
+  if (s < 60) return '\u0442\u043e\u043b\u044c\u043a\u043e \u0447\u0442\u043e';
+  if (s < 3600) return Math.floor(s/60)+' \u043c\u0438\u043d';
+  if (s < 86400) return Math.floor(s/3600)+' \u0447';
+  return Math.floor(s/86400)+' \u0434';
 }
 function fmtTime(ts) {
   if (!ts) return '';
-  return new Date(ts.toDate()).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  return new Date(ts.toDate()).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
 }
 
-auth.onAuthStateChanged((user) => {
+onAuthStateChanged(auth, user => {
   if (user) { me = user; init(); }
-  else { window.location.href = '/login.html'; }
+  else window.location.href = '/login.html';
 });
 
 async function init() {
-  const pd = await db.collection('users').doc(me.uid).get();
+  const pd = await getDoc(doc(db, 'users', me.uid));
   if (!pd.exists) { window.location.href = '/profile.html?setup=1'; return; }
   myProfile = pd.data();
-  document.getElementById('sidebar-av').textContent = (myProfile.name || 'U')[0].toUpperCase();
-  document.getElementById('sidebar-name').textContent = myProfile.name || '';
-  document.getElementById('sidebar-handle').textContent = '@' + (myProfile.username || '');
+  updateSidebar(myProfile);
   loadChats();
   showNotificationButtonIfNeeded();
-  db.collection('users').doc(me.uid).update({ isOnline: true }).catch(console.error);
+  updateDoc(doc(db, 'users', me.uid), { isOnline: true }).catch(console.error);
   if ('Notification' in window && Notification.permission === 'granted') setTimeout(requestFCMToken, 2000);
 }
 
 function showNotificationButtonIfNeeded() {
   const btn = document.getElementById('enable-notifications-btn');
-  if (btn && 'Notification' in window && Notification.permission === 'default') {
-    btn.style.display = 'block';
-  }
+  if (btn && 'Notification' in window && Notification.permission === 'default') btn.style.display = 'block';
 }
-
 async function enableNotifications() {
   const btn = document.getElementById('enable-notifications-btn');
   if (!btn) return;
   try {
-    const permission = await Notification.requestPermission();
+    const p = await Notification.requestPermission();
     btn.style.display = 'none';
-    if (permission === 'granted') setTimeout(requestFCMToken, 2000);
-  } catch(e) {
-    btn.style.display = 'none';
-  }
+    if (p === 'granted') setTimeout(requestFCMToken, 2000);
+  } catch { btn.style.display = 'none'; }
 }
-
 async function requestFCMToken() {
   try {
-    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-    const messaging = firebase.messaging();
-    const token = await messaging.getToken({ vapidKey, serviceWorkerRegistration: registration });
-    if (token) {
-      await db.collection('users').doc(me.uid).set({ fcmToken: token }, { merge: true });
-      console.log('FCM Token сохранён');
-    }
-  } catch(e) {
-    console.error('FCM error:', e);
-  }
+    const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    const messaging = getMessaging(app);
+    const token = await getToken(messaging, { vapidKey, serviceWorkerRegistration: reg });
+    if (token) await setDoc(doc(db, 'users', me.uid), { fcmToken: token }, { merge: true });
+  } catch(e) { console.error('FCM error:', e); }
 }
 
 window.addEventListener('beforeunload', () => {
-  if (me) db.collection('users').doc(me.uid).update({ isOnline: false }).catch(() => {});
+  if (me) updateDoc(doc(db, 'users', me.uid), { isOnline: false }).catch(()=>{});
 });
-
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) {
-    unreadCount = 0;
-    document.title = 'Costax — Сообщения';
-  }
+  if (!document.hidden) { unreadCount = 0; document.title = 'Costax \u2014 \u0421\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u044f'; }
 });
 
-let oldestDoc = null;
-let hasMore = false;
-let loadingMore = false;
-let renderedMsgIds = new Set();
+let oldestDoc = null, hasMore = false, loadingMore = false, renderedMsgIds = new Set();
 
 function createMsgDiv(m, isMine) {
   const div = document.createElement('div');
@@ -347,15 +327,16 @@ function createMsgDiv(m, isMine) {
   div.innerHTML = `<div class="msg-bubble">${esc(m.text)}</div><div class="msg-time">${fmtTime(m.ts)}</div>`;
   return div;
 }
-
-window.loadOlderMessages = async function() {
+async function loadOlderMessages() {
   if (!activeChatId || !oldestDoc || loadingMore || !hasMore) return;
   loadingMore = true;
   const btn = document.getElementById('load-more-btn');
-  if (btn) btn.textContent = 'Загрузка...';
+  if (btn) btn.textContent = '\u0417\u0430\u0433\u0440\u0443\u0437\u043a\u0430...';
   try {
-    const snap = await db.collection('chats').doc(activeChatId).collection('messages')
-      .orderBy('ts').endBefore(oldestDoc).limitToLast(50).get();
+    const snap = await getDocs(query(
+      collection(db, 'chats', activeChatId, 'messages'),
+      orderBy('ts'), endBefore(oldestDoc), limitToLast(50)
+    ));
     const msgsEl = document.getElementById('chat-messages');
     if (snap.empty) {
       hasMore = false;
@@ -364,10 +345,10 @@ window.loadOlderMessages = async function() {
     }
     const scrollBefore = msgsEl.scrollHeight - msgsEl.scrollTop;
     const oldMsgs = [];
-    snap.forEach(doc => {
-      if (!renderedMsgIds.has(doc.id)) {
-        renderedMsgIds.add(doc.id);
-        oldMsgs.push(createMsgDiv(doc.data(), doc.data().uid === me.uid));
+    snap.forEach(d => {
+      if (!renderedMsgIds.has(d.id)) {
+        renderedMsgIds.add(d.id);
+        oldMsgs.push(createMsgDiv(d.data(), d.data().uid === me.uid));
       }
     });
     oldestDoc = snap.docs[0];
@@ -376,37 +357,30 @@ window.loadOlderMessages = async function() {
     msgsEl.scrollTop = msgsEl.scrollHeight - scrollBefore;
     hasMore = snap.docs.length >= 50;
     if (!hasMore) document.getElementById('load-more-wrap').style.display = 'none';
-    else if (btn) btn.textContent = 'Загрузить ещё';
-  } finally {
-    loadingMore = false;
-  }
-};
+    else if (btn) btn.textContent = '\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c \u0435\u0449\u0451';
+  } finally { loadingMore = false; }
+}
 
 let chatsUnsubscribe = null;
 function loadChats() {
   if (chatsUnsubscribe) { chatsUnsubscribe(); chatsUnsubscribe = null; }
-  const q = db.collection('chats').where('members', 'array-contains', me.uid).orderBy('lastAt', 'desc');
-  chatsUnsubscribe = q.onSnapshot(async (snap) => {
+  const q = query(collection(db,'chats'), where('members','array-contains',me.uid), orderBy('lastAt','desc'));
+  chatsUnsubscribe = onSnapshot(q, async snap => {
     const list = document.getElementById('chats-list');
-    if (snap.empty) { list.innerHTML = `<div class="empty-chats">Нет сообщений.<br>Нажми «+ Новый» чтобы написать.</div>`; return; }
+    if (snap.empty) { list.innerHTML = `<div class="empty-chats">\u041d\u0435\u0442 \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0439.<br>\u041d\u0430\u0436\u043c\u0438 \u00ab+ \u041d\u043e\u0432\u044b\u0439\u00bb \u0447\u0442\u043e\u0431\u044b \u043d\u0430\u043f\u0438\u0441\u0430\u0442\u044c.</div>`; return; }
     const chatMap = new Map();
     let totalUnread = 0;
-    for (const doc of snap.docs) {
-      const data = doc.data();
+    for (const d of snap.docs) {
+      const data = d.data();
       totalUnread += (data.unread && data.unread[me.uid]) || 0;
-      const el = await renderChatItem({ id: doc.id, ...data });
-      chatMap.set(doc.id, el);
+      chatMap.set(d.id, await renderChatItem({ id: d.id, ...data }));
     }
     list.innerHTML = '';
     chatMap.forEach(el => list.appendChild(el));
     const badge = document.getElementById('nav-unread-badge');
-    if (badge) {
-      badge.textContent = totalUnread > 99 ? '99+' : totalUnread;
-      badge.style.display = totalUnread > 0 ? 'block' : 'none';
-    }
-  }, (error) => { console.error('Chats error:', error); });
+    if (badge) { badge.textContent = totalUnread > 99 ? '99+' : totalUnread; badge.style.display = totalUnread > 0 ? 'block' : 'none'; }
+  }, e => console.error('Chats error:', e));
 }
-
 async function renderChatItem(chat) {
   const otherId = chat.members.find(id => id !== me.uid);
   const other = await getUser(otherId);
@@ -418,7 +392,7 @@ async function renderChatItem(chat) {
     <div class="ci-av">${(other.name||'U')[0].toUpperCase()}</div>
     <div class="ci-info">
       <div class="ci-name" style="font-weight:${unread>0?'800':'700'}">${esc(other.name)}</div>
-      <div class="ci-last" style="font-weight:${unread>0?'700':'500'}">${esc(chat.lastMsg || 'Начни переписку')}</div>
+      <div class="ci-last" style="font-weight:${unread>0?'700':'500'}">${esc(chat.lastMsg||'\u041d\u0430\u0447\u043d\u0438 \u043f\u0435\u0440\u0435\u043f\u0438\u0441\u043a\u0443')}</div>
     </div>
     <div class="ci-meta">
       <div class="ci-time">${chat.lastAt ? timeAgo(chat.lastAt.toDate()) : ''}</div>
@@ -428,158 +402,142 @@ async function renderChatItem(chat) {
   return div;
 }
 
-window.openChat = function(chatId, other) {
+function openChat(chatId, other) {
   activeChatId = chatId;
   document.getElementById('chat-empty').style.display = 'none';
   document.getElementById('chat-active').style.display = 'flex';
   document.getElementById('chat-av').textContent = (other.name||'U')[0].toUpperCase();
-  document.getElementById('chat-name').textContent = other.name || 'Пользователь';
-  document.getElementById('chat-handle').textContent = '@' + (other.username || '');
+  document.getElementById('chat-name').textContent = other.name || '\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c';
+  document.getElementById('chat-handle').textContent = '@' + (other.username||'');
   const onlineDot = document.getElementById('chat-online');
   if (onlineDot) onlineDot.style.display = other.isOnline ? 'inline-block' : 'none';
   document.getElementById('chat-window').classList.add('open');
   document.querySelectorAll('.chat-item').forEach(el => el.classList.toggle('active', el.dataset.chatId === chatId));
-  db.collection('chats').doc(chatId).update({ [`unread.${me.uid}`]: 0 }).catch(() => {});
+  updateDoc(doc(db,'chats',chatId), { [`unread.${me.uid}`]: 0 }).catch(()=>{});
   if (typingUnsubscribe) { typingUnsubscribe(); typingUnsubscribe = null; }
   clearTimeout(typingTimeout);
-  const typingEl = document.getElementById('typing-indicator');
   const otherId = other.uid || (chatId.split('_').find(id => id !== me.uid));
   const handleEl = document.getElementById('chat-handle');
-  const originalHandle = '@' + (other.username || '');
-  typingUnsubscribe = db.collection('chats').doc(chatId).onSnapshot(doc => {
-    const data = doc.data();
+  const originalHandle = '@' + (other.username||'');
+  typingUnsubscribe = onSnapshot(doc(db,'chats',chatId), snap => {
+    const data = snap.data();
     const isTyping = data && data.typing && data.typing[otherId] &&
       (Date.now() - data.typing[otherId].toDate().getTime()) < 5000;
-    if (handleEl) {
-      handleEl.textContent = isTyping ? 'Печатает...' : originalHandle;
-      handleEl.style.color = isTyping ? '#1D9BF0' : '';
-    }
+    if (handleEl) { handleEl.textContent = isTyping ? '\u041f\u0435\u0447\u0430\u0442\u0430\u0435\u0442...' : originalHandle; handleEl.style.color = isTyping ? '#1D9BF0' : ''; }
   });
-  // Reset pagination state for this chat
-  oldestDoc = null; hasMore = false; loadingMore = false;
-  renderedMsgIds = new Set();
+  oldestDoc = null; hasMore = false; loadingMore = false; renderedMsgIds = new Set();
   const loadMoreWrap = document.getElementById('load-more-wrap');
   if (loadMoreWrap) loadMoreWrap.style.display = 'none';
-
   if (msgsUnsubscribe) msgsUnsubscribe();
   const msgsEl = document.getElementById('chat-messages');
   msgsEl.innerHTML = '';
   let initialLoad = true;
-  msgsUnsubscribe = db.collection('chats').doc(chatId).collection('messages').orderBy('ts').limitToLast(50).onSnapshot(snap => {
-    if (initialLoad) {
-      initialLoad = false;
-      snap.forEach(doc => {
-        renderedMsgIds.add(doc.id);
-        msgsEl.appendChild(createMsgDiv(doc.data(), doc.data().uid === me.uid));
+  msgsUnsubscribe = onSnapshot(
+    query(collection(db,'chats',chatId,'messages'), orderBy('ts'), limitToLast(50)),
+    snap => {
+      if (initialLoad) {
+        initialLoad = false;
+        snap.forEach(d => { renderedMsgIds.add(d.id); msgsEl.appendChild(createMsgDiv(d.data(), d.data().uid === me.uid)); });
+        if (snap.docs.length > 0) {
+          oldestDoc = snap.docs[0];
+          hasMore = snap.docs.length >= 50;
+          if (loadMoreWrap) loadMoreWrap.style.display = hasMore ? 'block' : 'none';
+        }
+        msgsEl.scrollTop = msgsEl.scrollHeight;
+        return;
+      }
+      let newAdded = false;
+      snap.docChanges().forEach(change => {
+        if (change.type === 'added' && !renderedMsgIds.has(change.doc.id)) {
+          renderedMsgIds.add(change.doc.id);
+          msgsEl.appendChild(createMsgDiv(change.doc.data(), change.doc.data().uid === me.uid));
+          newAdded = true;
+        }
       });
-      if (snap.docs.length > 0) {
-        oldestDoc = snap.docs[0];
-        hasMore = snap.docs.length >= 50;
-        if (loadMoreWrap) loadMoreWrap.style.display = hasMore ? 'block' : 'none';
+      if (newAdded) {
+        msgsEl.scrollTop = msgsEl.scrollHeight;
+        if (document.hidden) { unreadCount++; document.title = `(${unreadCount}) \u0427\u0430\u0442`; }
       }
-      msgsEl.scrollTop = msgsEl.scrollHeight;
-      return;
     }
-    let newAdded = false;
-    snap.docChanges().forEach(change => {
-      if (change.type === 'added' && !renderedMsgIds.has(change.doc.id)) {
-        renderedMsgIds.add(change.doc.id);
-        msgsEl.appendChild(createMsgDiv(change.doc.data(), change.doc.data().uid === me.uid));
-        newAdded = true;
-      }
-    });
-    if (newAdded) {
-      msgsEl.scrollTop = msgsEl.scrollHeight;
-      if (document.hidden) { unreadCount++; document.title = `(${unreadCount}) Чат`; }
-    }
-  });
-};
+  );
+}
 
-window.sendMsg = async function() {
+async function sendMsg() {
   const input = document.getElementById('msg-input');
   const text = input.value.trim();
   if (!text || !activeChatId) return;
-  input.value = '';
-  input.style.height = 'auto';
+  input.value = ''; input.style.height = 'auto';
   clearTyping();
-  const ref = db.collection('chats').doc(activeChatId);
-  await ref.collection('messages').add({ text, uid: me.uid, ts: firebase.firestore.FieldValue.serverTimestamp() });
-  // Отправить push собеседнику + инкремент счётчика
+  const chatRef = doc(db, 'chats', activeChatId);
+  await addDoc(collection(db,'chats',activeChatId,'messages'), { text, uid: me.uid, ts: serverTimestamp() });
   try {
-    const chatDoc = await ref.get();
-    const otherId = chatDoc.data().members.find(id => id !== me.uid);
-    await ref.update({
-      lastMsg: text,
-      lastAt: firebase.firestore.FieldValue.serverTimestamp(),
-      [`unread.${otherId}`]: firebase.firestore.FieldValue.increment(1)
-    });
-    const otherDoc = await db.collection('users').doc(otherId).get();
+    const chatSnap = await getDoc(chatRef);
+    const otherId = chatSnap.data().members.find(id => id !== me.uid);
+    await updateDoc(chatRef, { lastMsg: text, lastAt: serverTimestamp(), [`unread.${otherId}`]: increment(1) });
+    const otherDoc = await getDoc(doc(db,'users',otherId));
     const fcmToken = otherDoc.exists ? otherDoc.data().fcmToken : null;
     if (fcmToken && myProfile) {
+      const idToken = await me.getIdToken();
       fetch('/api/send-push', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: fcmToken, title: myProfile.name || 'Сообщение', body: text })
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+        body: JSON.stringify({ token: fcmToken, title: myProfile.name || '\u0421\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435', body: text })
       }).catch(console.error);
     }
   } catch(e) { console.error('Push error:', e); }
-};
+}
 
 function setTyping() {
   if (!activeChatId || !me) return;
-  db.collection('chats').doc(activeChatId).update({ [`typing.${me.uid}`]: firebase.firestore.FieldValue.serverTimestamp() }).catch(() => {});
+  updateDoc(doc(db,'chats',activeChatId), { [`typing.${me.uid}`]: serverTimestamp() }).catch(()=>{});
   clearTimeout(typingTimeout);
   typingTimeout = setTimeout(() => clearTyping(), 3000);
 }
 function clearTyping() {
   if (!activeChatId || !me) return;
-  db.collection('chats').doc(activeChatId).update({ [`typing.${me.uid}`]: firebase.firestore.FieldValue.delete() }).catch(() => {});
+  updateDoc(doc(db,'chats',activeChatId), { [`typing.${me.uid}`]: deleteField() }).catch(()=>{});
 }
-window.handleKey = function(e) {
+function handleKey(e) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); clearTyping(); sendMsg(); return; }
   setTyping();
-};
-window.autoResize = function(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; };
-window.closeChatMobile = function() { document.getElementById('chat-window').classList.remove('open'); };
-
-window.showNewChat = function() {
+}
+function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
+function closeChatMobile() { document.getElementById('chat-window').classList.remove('open'); }
+function showNewChat() {
   document.getElementById('modal-overlay').classList.add('show');
   document.getElementById('modal-search').value = '';
   document.getElementById('modal-results').innerHTML = '';
   setTimeout(() => document.getElementById('modal-search').focus(), 100);
-};
-window.hideNewChat = function() { document.getElementById('modal-overlay').classList.remove('show'); };
-
-window.searchForUser = async function(val) {
-  const q = val.trim().toLowerCase().replace('@', '');
+}
+function hideNewChat() { document.getElementById('modal-overlay').classList.remove('show'); }
+async function searchForUser(val) {
+  const q = val.trim().toLowerCase().replace('@','');
   const res = document.getElementById('modal-results');
   res.innerHTML = '';
   if (!q || q.length < 2) return;
-  const snap = await db.collection('users').where('username', '>=', q).where('username', '<=', q + '\uf8ff').limit(5).get();
-  if (snap.empty) { res.innerHTML = '<div style="padding:10px;font-size:13px;color:#536471;">Пользователь не найден</div>'; return; }
-  snap.forEach(doc => {
-    if (doc.id === me.uid) return;
-    const u = doc.data();
+  const snap = await getDocs(query(collection(db,'users'), where('username','>=',q), where('username','<=',q+'\uf8ff'), limit(5)));
+  if (snap.empty) { res.innerHTML = '<div style="padding:10px;font-size:13px;color:#536471;">\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d</div>'; return; }
+  snap.forEach(d => {
+    if (d.id === me.uid) return;
+    const u = d.data();
     const div = document.createElement('div');
     div.className = 'modal-user';
     div.innerHTML = `<div class="mu-av">${(u.name||'U')[0].toUpperCase()}</div><div><div class="mu-name">${esc(u.name)}</div><div class="mu-handle">@${esc(u.username)}</div></div>`;
-    div.onclick = () => { hideNewChat(); openChatWithUser(doc.id); };
+    div.onclick = () => { hideNewChat(); openChatWithUser(d.id); };
     res.appendChild(div);
   });
-};
-
-window.openChatWithUser = async function(targetUid) {
+}
+async function openChatWithUser(targetUid) {
   if (!me || targetUid === me.uid) return;
   const chatId = [me.uid, targetUid].sort().join('_');
-  const chatRef = db.collection('chats').doc(chatId);
-  const chatSnap = await chatRef.get();
-  if (!chatSnap.exists) {
-    await chatRef.set({ members: [me.uid, targetUid], lastMsg: '', lastAt: firebase.firestore.FieldValue.serverTimestamp() });
-  }
-  const otherSnap = await db.collection('users').doc(targetUid).get();
-  const other = otherSnap.exists ? otherSnap.data() : { name: 'Пользователь', username: '' };
-  openChat(chatId, other);
-};
+  const chatRef = doc(db,'chats',chatId);
+  const chatSnap = await getDoc(chatRef);
+  if (!chatSnap.exists) await setDoc(chatRef, { members: [me.uid, targetUid], lastMsg: '', lastAt: serverTimestamp() });
+  const otherSnap = await getDoc(doc(db,'users',targetUid));
+  openChat(chatId, otherSnap.exists ? otherSnap.data() : { name: '\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c', username: '' });
+}
+
+Object.assign(window, { openChat, sendMsg, handleKey, autoResize, closeChatMobile,
+  showNewChat, hideNewChat, searchForUser, openChatWithUser, loadOlderMessages, enableNotifications });
 </script>
 </body>
-</html>

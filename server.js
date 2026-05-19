@@ -10,6 +10,7 @@ app.use(express.json());
 
 // Firebase Admin — необязательный, только если заданы переменные
 let adminMessaging = null;
+let adminAuth = null;
 try {
   const admin = require('firebase-admin');
   if (!admin.apps.length && process.env.FIREBASE_PROJECT_ID) {
@@ -21,6 +22,7 @@ try {
       })
     });
     adminMessaging = admin.messaging();
+    adminAuth = admin.auth();
     console.log('Firebase Admin OK');
   } else {
     console.log('Firebase Admin — переменные не заданы, push отключены');
@@ -40,6 +42,15 @@ app.get('*', (req, res, next) => {
 app.post('/api/send-push', async (req, res) => {
   if (!adminMessaging) {
     return res.status(503).json({ error: 'Push не настроен' });
+  }
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  try {
+    await adminAuth.verifyIdToken(authHeader.slice(7));
+  } catch(e) {
+    return res.status(401).json({ error: 'Invalid token' });
   }
   const { token, title, body } = req.body;
   if (!token || !title || !body) {
