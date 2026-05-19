@@ -63,10 +63,10 @@ body.dark .theme-row:hover{background:#181818}
 .toggle-dot{width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;top:2px;transition:left .25s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
 
 /* ── MOBILE NAV ── */
-.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:100;padding:8px 0 max(8px,env(safe-area-inset-bottom));transition:all .3s}
+.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:100;transition:all .3s}
 body.light .mob-nav{background:rgba(255,255,255,.95);border-top:1px solid #EFF3F4}
 body.dark .mob-nav{background:rgba(0,0,0,.95);border-top:1px solid #2F3336}
-.mob-nav-inner{display:flex;justify-content:space-around}
+.mob-nav-inner{display:flex;justify-content:space-around;align-items:center;padding:8px 0 max(8px,env(safe-area-inset-bottom));min-height:56px}
 .mob-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 16px;text-decoration:none;font-size:10px;font-weight:700;cursor:pointer;transition:color .3s}
 body.light .mob-item{color:#536471}
 body.dark .mob-item{color:#71767B}
@@ -444,13 +444,13 @@ body.dark .btn-main{background:#E7E9EA;color:#0F1419}
 @media(max-width:900px){.right-panel{display:none}}
 @media(max-width:640px){
   .sidebar{display:none}
-  .mob-nav{display:block}
+  .mob-nav{display:flex;flex-direction:column}
   .feed-col{border-right:none;padding-bottom:60px}
   .profile-col{padding-bottom:60px}
   .chats-panel{width:100%;min-width:unset;border-right:none;padding-bottom:60px}
-  .chat-window{display:none;position:fixed;inset:0;z-index:150;flex-direction:column}
+  .chat-window{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:150;flex-direction:column}
   .chat-window.open{display:flex}
-  .chat-window.open .chat-input-wrap{padding-bottom:max(12px,env(safe-area-inset-bottom))}
+  .chat-window.open .chat-input-wrap{padding-bottom:max(16px,env(safe-area-inset-bottom))}
   .chat-back-btn{display:flex!important}
 }
 </style>
