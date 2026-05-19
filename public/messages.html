@@ -97,6 +97,9 @@ body.dark .ci-last { color: #71767B; }
 .ci-time { font-size: 12px; flex-shrink: 0; transition: color 0.3s; }
 body.light .ci-time { color: #536471; }
 body.dark .ci-time { color: #71767B; }
+.ci-badge { background: #1D9BF0; color: white; border-radius: 9999px; font-size: 11px; font-weight: 800; padding: 2px 7px; min-width: 20px; text-align: center; flex-shrink: 0; }
+.ci-name-row { display: flex; align-items: center; justify-content: space-between; }
+.ci-meta { display: flex; align-items: center; gap: 6px; flex-shrink: 0; flex-direction: column; align-items: flex-end; }
 .empty-chats { padding: 40px 20px; text-align: center; font-size: 14px; font-weight: 600; line-height: 1.8; transition: color 0.3s; }
 body.light .empty-chats { color: #536471; }
 body.dark .empty-chats { color: #71767B; }
@@ -434,16 +437,20 @@ function loadChats() {
 async function renderChatItem(chat) {
   const otherId = chat.members.find(id => id !== me.uid);
   const other = await getUser(otherId);
+  const unread = (chat.unread && chat.unread[me.uid]) || 0;
   const div = document.createElement('div');
   div.className = 'chat-item';
   div.dataset.chatId = chat.id;
   div.innerHTML = `
     <div class="ci-av">${(other.name||'U')[0].toUpperCase()}</div>
     <div class="ci-info">
-      <div class="ci-name">${esc(other.name)}</div>
-      <div class="ci-last">${esc(chat.lastMsg || 'Начни переписку')}</div>
+      <div class="ci-name" style="font-weight:${unread>0?'800':'700'}">${esc(other.name)}</div>
+      <div class="ci-last" style="font-weight:${unread>0?'700':'500'}">${esc(chat.lastMsg || 'Начни переписку')}</div>
     </div>
-    <div class="ci-time">${chat.lastAt ? timeAgo(chat.lastAt.toDate()) : ''}</div>`;
+    <div class="ci-meta">
+      <div class="ci-time">${chat.lastAt ? timeAgo(chat.lastAt.toDate()) : ''}</div>
+      ${unread > 0 ? `<div class="ci-badge">${unread > 99 ? '99+' : unread}</div>` : ''}
+    </div>`;
   div.onclick = () => openChat(chat.id, other);
   return div;
 }
@@ -459,6 +466,7 @@ window.openChat = function(chatId, other) {
   if (onlineDot) onlineDot.style.display = other.isOnline ? 'inline-block' : 'none';
   document.getElementById('chat-window').classList.add('open');
   document.querySelectorAll('.chat-item').forEach(el => el.classList.toggle('active', el.dataset.chatId === chatId));
+  db.collection('chats').doc(chatId).update({ [`unread.${me.uid}`]: 0 }).catch(() => {});
   if (msgsUnsubscribe) msgsUnsubscribe();
   const msgsEl = document.getElementById('chat-messages');
   msgsEl.innerHTML = '';
@@ -491,11 +499,15 @@ window.sendMsg = async function() {
   input.style.height = 'auto';
   const ref = db.collection('chats').doc(activeChatId);
   await ref.collection('messages').add({ text, uid: me.uid, ts: firebase.firestore.FieldValue.serverTimestamp() });
-  await ref.update({ lastMsg: text, lastAt: firebase.firestore.FieldValue.serverTimestamp() });
-  // Отправить push собеседнику
+  // Отправить push собеседнику + инкремент счётчика
   try {
     const chatDoc = await ref.get();
     const otherId = chatDoc.data().members.find(id => id !== me.uid);
+    await ref.update({
+      lastMsg: text,
+      lastAt: firebase.firestore.FieldValue.serverTimestamp(),
+      [`unread.${otherId}`]: firebase.firestore.FieldValue.increment(1)
+    });
     const otherDoc = await db.collection('users').doc(otherId).get();
     const fcmToken = otherDoc.exists ? otherDoc.data().fcmToken : null;
     if (fcmToken && myProfile) {
