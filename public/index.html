@@ -598,7 +598,7 @@ window.switchTab = function(tab) {
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, doc, getDoc, getDocs, deleteDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where, limit, setDoc, FieldValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, doc, getDoc, getDocs, deleteDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where, limit, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { increment, deleteField } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -702,7 +702,7 @@ onAuthStateChanged(auth, async user => {
   updateSidebar();
   document.getElementById('app').style.display = 'flex';
 
-  db.collection('users').doc(me.uid).update({ isOnline: true }).catch(() => {});
+  updateDoc(doc(db,'users',me.uid), { isOnline: true }).catch(() => {});
   watchUnreadBadge();
   showNotificationButtonIfNeeded();
   if ('Notification' in window && Notification.permission === 'granted') setTimeout(requestFCMToken, 2000);
