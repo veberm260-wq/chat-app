@@ -351,7 +351,7 @@ async function init() {
   loadChats();
   showNotificationButtonIfNeeded();
   db.collection('users').doc(me.uid).update({ isOnline: true }).catch(console.error);
-  if ('Notification' in window && Notification.permission === 'granted') requestFCMToken();
+  if ('Notification' in window && Notification.permission === 'granted') setTimeout(requestFCMToken, 2000);
 }
 
 function showNotificationButtonIfNeeded() {
@@ -367,7 +367,7 @@ async function enableNotifications() {
   try {
     const permission = await Notification.requestPermission();
     btn.style.display = 'none';
-    if (permission === 'granted') requestFCMToken();
+    if (permission === 'granted') setTimeout(requestFCMToken, 2000);
   } catch(e) {
     btn.style.display = 'none';
   }
