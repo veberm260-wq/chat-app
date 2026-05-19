@@ -23,9 +23,13 @@ self.addEventListener('notificationclick', event => {
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
       for (const client of list) {
-        if (client.url.includes('/messages') && 'focus' in client) return client.focus();
+        if ('focus' in client) {
+          client.focus();
+          client.navigate('/#/messages');
+          return;
+        }
       }
-      return clients.openWindow('/messages.html');
+      return clients.openWindow('/#/messages');
     })
   );
 });
