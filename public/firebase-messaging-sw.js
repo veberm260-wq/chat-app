@@ -15,5 +15,17 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
   const title = payload.data?.title || 'Новое сообщение';
   const body = payload.data?.body || '';
-  self.registration.showNotification(title, { body, icon: '/favicon.svg' });
+  self.registration.showNotification(title, { body, icon: '/favicon.svg', data: payload.data });
+});
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      for (const client of list) {
+        if (client.url.includes('/messages') && 'focus' in client) return client.focus();
+      }
+      return clients.openWindow('/messages.html');
+    })
+  );
 });
