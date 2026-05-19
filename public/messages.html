@@ -351,6 +351,7 @@ async function init() {
   loadChats();
   showNotificationButtonIfNeeded();
   db.collection('users').doc(me.uid).update({ isOnline: true }).catch(console.error);
+  if ('Notification' in window && Notification.permission === 'granted') requestFCMToken();
 }
 
 function showNotificationButtonIfNeeded() {
