@@ -1,5 +1,5 @@
-const CACHE = 'costax-v2';
-const ASSETS = ['/', '/login', '/messages.html', '/profile.html', '/user.html'];
+const CACHE = 'costax-v3';
+const ASSETS = ['/'];
 
 self.addEventListener('install', e => {
   e.waitUntil(

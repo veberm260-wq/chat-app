@@ -29,12 +29,12 @@ try {
   console.warn('Firebase Admin не запустился:', e.message);
 }
 
-// Маршруты
-app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
-app.get('/profile', (req, res) => res.sendFile(path.join(__dirname, 'public', 'profile.html')));
-app.get('/messages', (req, res) => res.sendFile(path.join(__dirname, 'public', 'messages.html')));
-app.get('/user', (req, res) => res.sendFile(path.join(__dirname, 'public', 'user.html')));
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+// SPA — все маршруты отдают index.html
+const indexFile = path.join(__dirname, 'public', 'index.html');
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api/')) return next();
+  res.sendFile(indexFile);
+});
 
 // Push endpoint
 app.post('/api/send-push', async (req, res) => {
