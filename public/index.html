@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
+<link rel="stylesheet" href="/shared.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Nunito',-apple-system,sans-serif;height:100vh;height:100dvh;overflow:hidden;transition:background .3s,color .3s}
@@ -474,7 +475,9 @@ body.dark .btn-main{background:#E7E9EA;color:#0F1419}
 </style>
 </head>
 <body class="light">
+<script>if(localStorage.getItem('theme')==='dark')document.body.className='dark'</script>
 <canvas id="stars-canvas"></canvas>
+<script src="/shared.js"></script>
 
 <!-- LOGIN PAGE -->
 <div id="login-page">
@@ -568,43 +571,6 @@ body.dark .btn-main{background:#E7E9EA;color:#0F1419}
 </div>
 
 <script>
-// ── STARS ──
-let starsRunning = false;
-function initStars() {
-  const canvas = document.getElementById('stars-canvas');
-  const ctx = canvas.getContext('2d');
-  let stars = [];
-  function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
-  function createStars() {
-    stars = [];
-    for (let i = 0; i < 200; i++) stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*1.2+0.2, speed: 0.003+Math.random()*0.008, phase: Math.random()*Math.PI*2 });
-  }
-  function draw(t) {
-    if (!document.body.classList.contains('dark')) { starsRunning = false; return; }
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    stars.forEach(s => { const a = 0.15+0.65*(0.5+0.5*Math.sin(t*s.speed+s.phase)); ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fillStyle=`rgba(255,255,255,${a})`; ctx.fill(); });
-    requestAnimationFrame(draw);
-  }
-  window._startStars = function() { if (starsRunning) return; starsRunning = true; requestAnimationFrame(draw); };
-  resize(); createStars();
-  window.addEventListener('resize', () => { resize(); createStars(); });
-}
-initStars();
-
-// ── THEME ──
-let isDark = false;
-function toggleTheme() {
-  isDark = !isDark;
-  document.body.className = isDark ? 'dark' : 'light';
-  document.getElementById('theme-icon').className = isDark ? 'ti ti-sun' : 'ti ti-moon';
-  document.getElementById('theme-label').textContent = isDark ? 'Светлая тема' : 'Тёмная тема';
-  document.getElementById('toggle-pill').style.background = isDark ? '#1D9BF0' : '#E7E9EA';
-  document.getElementById('toggle-dot').style.left = isDark ? '20px' : '2px';
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  if (isDark) window._startStars && window._startStars();
-}
-if (localStorage.getItem('theme') === 'dark') toggleTheme();
-
 // ── LOGIN UI ──
 window.switchTab = function(tab) {
   ['login','reg'].forEach(t => {
