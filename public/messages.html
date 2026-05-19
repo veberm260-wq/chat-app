@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="/icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/tabler-icons.min.css">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -253,9 +253,6 @@ body.dark .back-btn:hover { background: #181818; }
           <div class="ch-handle" id="chat-handle">@username</div>
         </div>
       </div>
-      <div id="typing-indicator" class="typing-indicator">
-        <span>Печатает</span><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
-      </div>
       <div class="chat-messages" id="chat-messages"></div>
       <div class="chat-input-wrap">
         <textarea class="chat-input" id="msg-input" placeholder="Напиши сообщение..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
@@ -490,11 +487,16 @@ window.openChat = function(chatId, other) {
   clearTimeout(typingTimeout);
   const typingEl = document.getElementById('typing-indicator');
   const otherId = other.uid || (chatId.split('_').find(id => id !== me.uid));
+  const handleEl = document.getElementById('chat-handle');
+  const originalHandle = '@' + (other.username || '');
   typingUnsubscribe = db.collection('chats').doc(chatId).onSnapshot(doc => {
     const data = doc.data();
     const isTyping = data && data.typing && data.typing[otherId] &&
       (Date.now() - data.typing[otherId].toDate().getTime()) < 5000;
-    if (typingEl) typingEl.style.display = isTyping ? 'flex' : 'none';
+    if (handleEl) {
+      handleEl.textContent = isTyping ? 'Печатает...' : originalHandle;
+      handleEl.style.color = isTyping ? '#1D9BF0' : '';
+    }
   });
   if (msgsUnsubscribe) msgsUnsubscribe();
   const msgsEl = document.getElementById('chat-messages');
