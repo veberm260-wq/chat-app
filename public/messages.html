@@ -120,8 +120,8 @@ body.dark .ch-name { color: #E7E9EA; }
 .ch-handle { font-size: 13px; transition: color 0.3s; }
 body.light .ch-handle { color: #536471; }
 body.dark .ch-handle { color: #71767B; }
-.typing-indicator { font-size: 12px; font-weight: 600; color: #1D9BF0; display: none; padding: 0 16px 6px; }
-.typing-dot { display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: #1D9BF0; margin: 0 1px; animation: typing-bounce 1.2s infinite; }
+.typing-indicator { font-size: 12px; font-weight: 600; color: #1D9BF0; display: none; padding: 4px 16px; align-items: center; gap: 4px; flex-shrink: 0; }
+.typing-dot { width: 5px; height: 5px; border-radius: 50%; background: #1D9BF0; animation: typing-bounce 1.2s infinite; flex-shrink: 0; }
 .typing-dot:nth-child(2) { animation-delay: 0.2s; }
 .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 @keyframes typing-bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-4px)} }
@@ -254,7 +254,7 @@ body.dark .back-btn:hover { background: #181818; }
         </div>
       </div>
       <div id="typing-indicator" class="typing-indicator">
-        <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
+        <span>Печатает</span><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
       </div>
       <div class="chat-messages" id="chat-messages"></div>
       <div class="chat-input-wrap">
@@ -494,7 +494,7 @@ window.openChat = function(chatId, other) {
     const data = doc.data();
     const isTyping = data && data.typing && data.typing[otherId] &&
       (Date.now() - data.typing[otherId].toDate().getTime()) < 5000;
-    if (typingEl) typingEl.style.display = isTyping ? 'block' : 'none';
+    if (typingEl) typingEl.style.display = isTyping ? 'flex' : 'none';
   });
   if (msgsUnsubscribe) msgsUnsubscribe();
   const msgsEl = document.getElementById('chat-messages');
