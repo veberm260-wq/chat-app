@@ -751,13 +751,13 @@ window.enableNotifications = async function() {
 async function requestFCMToken() {
   try {
     const { getMessaging, getToken } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js");
-    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-    await navigator.serviceWorker.ready;
+    const registration = await navigator.serviceWorker.register('/sw.js');
+    await registration.update();
     const messaging = getMessaging(app);
     const token = await getToken(messaging, { vapidKey, serviceWorkerRegistration: registration });
     if (token) {
       await updateDoc(doc(db,'users',me.uid), { fcmToken: token });
-      console.log('FCM ok:', token.slice(0,20));
+      console.log('FCM ok');
     }
   } catch(e) { console.error('FCM error:', e); }
 }

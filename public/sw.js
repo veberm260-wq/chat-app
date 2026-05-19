@@ -1,4 +1,24 @@
-const CACHE = 'costax-v3';
+importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
+
+firebase.initializeApp({
+  apiKey: "AIzaSyCeveXncaJYszckdflfTVWCDc0AwNilR9k",
+  authDomain: "costax-aed53.firebaseapp.com",
+  projectId: "costax-aed53",
+  storageBucket: "costax-aed53.firebasestorage.app",
+  messagingSenderId: "747179946604",
+  appId: "1:747179946604:web:073d7faf7d80fb40041e49"
+});
+
+const messaging = firebase.messaging();
+
+messaging.onBackgroundMessage((payload) => {
+  const title = payload.data?.title || 'Новое сообщение';
+  const body = payload.data?.body || '';
+  self.registration.showNotification(title, { body, icon: '/favicon.svg', data: payload.data });
+});
+
+const CACHE = 'costax-v4';
 const ASSETS = ['/'];
 
 self.addEventListener('install', e => {
@@ -26,7 +46,11 @@ self.addEventListener('notificationclick', event => {
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
       for (const client of list) {
-        if ('focus' in client) return client.focus();
+        if ('focus' in client) {
+          client.focus();
+          client.navigate('/#/messages');
+          return;
+        }
       }
       return clients.openWindow('/#/messages');
     })
