@@ -47,8 +47,8 @@ app.post('/api/send-push', async (req, res) => {
   }
   try {
     const response = await adminMessaging.send({
-      notification: { title, body },
-      data: { click_action: '/messages.html' },
+      data: { title, body, click_action: '/messages.html' },
+      android: { priority: 'high' },
       token
     });
     res.json({ success: true, messageId: response });
